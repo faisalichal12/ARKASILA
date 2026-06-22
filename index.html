@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="id" class="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Arkasila — Media Pembelajaran Interaktif SMP</title>
+<meta name="description" content="Platform pembelajaran interaktif untuk siswa SMP. Materi lengkap, kuis seru, game edukatif, AI tutor, dan sertifikat.">
+<meta name="theme-color" content="#3b82f6">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%233b82f6'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3EA%3C/text%3E%3C/svg%3E">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Library untuk Download PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
+
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Plus Jakarta Sans', 'sans-serif'],
+        display: ['Fraunces', 'serif'],
+      },
+      colors: {
+        brand: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' },
+        accent: { 50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',300:'#6ee7b7',400:'#34d399',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b' },
+      }
+    }
+  }
+}
+</script>
+
+<style>
+body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+.font-display { font-family: 'Fraunces', serif; }
+.animated-hero-bg { background: linear-gradient(-45deg, #dbeafe, #ecfdf5, #e0f2fe, #d1fae5); background-size: 400% 400%; animation: gradientFlow 18s ease infinite; }
+.dark .animated-hero-bg { background: linear-gradient(-45deg, #0f172a, #1e293b, #0c4a6e, #14532d); background-size: 400% 400%; animation: gradientFlow 18s ease infinite; }
+@keyframes gradientFlow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+.blob { position:absolute; border-radius:50%; filter:blur(60px); opacity:0.5; animation:blob 14s ease-in-out infinite; pointer-events:none; }
+@keyframes blob { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-50px) scale(1.1)} 66%{transform:translate(-20px,20px) scale(0.9)} }
+.view-enter { animation: fadeInUp 0.5s ease-out; }
+@keyframes fadeInUp { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
+.card-hover { transition: all 0.35s cubic-bezier(0.4,0,0.2,1); }
+.card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(14,165,233,0.3); }
+.progress-fill { transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+::-webkit-scrollbar { width:8px; height:8px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+.dark ::-webkit-scrollbar-thumb { background:#475569; }
+.quiz-option { transition: all 0.25s ease; }
+.quiz-option:hover:not(.disabled) { transform: translateX(6px); border-color:#3b82f6; }
+.quiz-option.selected { background: linear-gradient(135deg,#dbeafe,#bfdbfe); border-color:#3b82f6; color:#1e40af; }
+.dark .quiz-option.selected { background: linear-gradient(135deg,#1e3a8a,#1e40af); color:#dbeafe; }
+.quiz-option.correct { background: linear-gradient(135deg,#d1fae5,#a7f3d0); border-color:#10b981; color:#065f46; }
+.dark .quiz-option.correct { background: linear-gradient(135deg,#064e3b,#065f46); color:#d1fae5; }
+.quiz-option.wrong { background: linear-gradient(135deg,#fee2e2,#fecaca); border-color:#ef4444; color:#991b1b; }
+.dark .quiz-option.wrong { background: linear-gradient(135deg,#7f1d1d,#991b1b); color:#fee2e2; }
+.toast-enter { animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes toastIn { from{transform:translateX(120%); opacity:0} to{transform:translateX(0); opacity:1} }
+.toast-exit { animation: toastOut 0.3s ease-in forwards; }
+@keyframes toastOut { to{transform:translateX(120%); opacity:0} }
+.badge-pop { animation: badgePop 0.7s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes badgePop { 0%{transform:scale(0) rotate(-180deg)} 60%{transform:scale(1.2) rotate(10deg)} 100%{transform:scale(1) rotate(0)} }
+.confetti { position:fixed; width:10px; height:10px; pointer-events:none; z-index:9999; animation: confettiFall 3s linear forwards; }
+@keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+.memory-card { perspective:1000px; cursor:pointer; }
+.memory-card-inner { position:relative; width:100%; height:100%; transition: transform 0.6s; transform-style: preserve-3d; }
+.memory-card.flipped .memory-card-inner, .memory-card.matched .memory-card-inner { transform: rotateY(180deg); }
+.memory-card-front, .memory-card-back { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:0.75rem; display:flex; align-items:center; justify-content:center; }
+.memory-card-back { transform: rotateY(180deg); }
+.glass { background: rgba(255,255,255,0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); }
+.dark .glass { background: rgba(15,23,42,0.65); border: 1px solid rgba(51,65,85,0.5); }
+.no-scrollbar::-webkit-scrollbar { display:none; }
+.no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+@media print { body * { visibility: hidden; } #certificate-print, #certificate-print * { visibility: visible; } #certificate-print { position: absolute; top:0; left:0; width:100%; box-shadow:none !important; } .no-print { display:none !important; } }
+.chat-bubble { animation: chatFade 0.4s ease-out; }
+@keyframes chatFade { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+.typing-dot { display:inline-block; width:8px; height:8px; background:#94a3b8; border-radius:50%; margin:0 2px; animation: typing 1.4s infinite; }
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
+.streak-glow { animation: streakPulse 2.5s ease-in-out infinite; }
+@keyframes streakPulse { 0%,100%{text-shadow:0 0 8px rgba(251,146,60,0.5)} 50%{text-shadow:0 0 20px rgba(251,146,60,0.9)} }
+.draggable { cursor:grab; transition: all 0.2s; }
+.draggable:active { cursor:grabbing; }
+.draggable.dragging { opacity:0.5; transform:scale(0.95); }
+.bottom-nav-item.active { color:#3b82f6; }
+.bottom-nav-item.active .nav-icon-wrap { background: linear-gradient(135deg,#3b82f6,#0ea5e9); color:white; transform:translateY(-6px); box-shadow:0 10px 20px -5px rgba(59,130,246,0.6); }
+.nav-icon-wrap { transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+.sidebar-item.active { background: linear-gradient(135deg,#3b82f6,#0ea5e9); color:white; box-shadow: 0 8px 20px -5px rgba(59,130,246,0.5); }
+.sidebar-item.active i { color:white; }
+.wheel { transition: transform 5s cubic-bezier(0.17,0.67,0.21,0.99); }
+html { scroll-behavior: smooth; }
+::selection { background:#3b82f6; color:white; }
+.modal-enter { animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+</style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 min-h-screen">
+
+<header class="sticky top-0 z-40 glass border-b border-slate-200/50 dark:border-slate-700/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-bars text-lg"></i></button>
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="navigate('home')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30"><i class="fa-solid fa-graduation-cap text-lg"></i></div>
+        <div><div class="font-display font-bold text-lg leading-none">Arkasila</div><div class="text-[10px] text-slate-500 dark:text-slate-400 leading-none mt-0.5">Media Pembelajaran SMP</div></div>
+      </div>
+    </div>
+    <div class="hidden md:flex items-center gap-3 flex-1 max-w-xs">
+      <div class="flex items-center gap-1.5 text-sm"><span class="font-bold text-brand-600 dark:text-brand-400">Lvl <span id="header-level">1</span></span></div>
+      <div class="flex-1 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden"><div id="header-xp-bar" class="h-full bg-gradient-to-r from-brand-500 to-accent-500 progress-fill" style="width:0%"></div></div>
+      <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap"><span id="header-xp">0</span> XP</span>
+    </div>
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <div class="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400"><span class="streak-glow">🔥</span><span class="text-sm font-bold" id="header-streak">0</span></div>
+      <button onclick="checkNetworkStatus()" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Network Status">
+        <i id="network-icon" class="fa-solid fa-wifi text-lg text-accent-500"></i>
+      </button>
+      <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Toggle theme"><i id="theme-icon" class="fa-solid fa-moon text-lg"></i></button>
+      <button onclick="showNotifications()" class="relative p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Notifications"><i class="fa-solid fa-bell text-lg"></i></button>
+      <button onclick="navigate('dashboard')" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <div id="header-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-sm font-bold">S</div>
+        <span class="hidden sm:block text-sm font-medium" id="header-name">Siswa</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<aside id="sidebar" class="hidden lg:flex fixed left-0 top-16 bottom-0 w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md z-30">
+  <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Menu Utama</div>
+    <button onclick="navigate('home')" data-nav="home" class="sidebar-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-house w-5 text-center text-slate-500"></i><span>Beranda</span></button>
+    <button onclick="navigate('dashboard')" data-nav="dashboard" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-chart-line w-5 text-center text-slate-500"></i><span>Dashboard</span></button>
+    <button onclick="navigate('materi')" data-nav="materi" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-book-open w-5 text-center text-slate-500"></i><span>Materi</span></button>
+    <button onclick="navigate('video')" data-nav="video" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-video w-5 text-center text-slate-500"></i><span>Video Materi</span></button>
+    <button onclick="navigate('kuis')" data-nav="kuis" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-circle-question w-5 text-center text-slate-500"></i><span>Kuis</span></button>
+    <button onclick="navigate('game')" data-nav="game" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-gamepad w-5 text-center text-slate-500"></i><span>Game Edukasi</span></button>
+    
+    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Informasi</div>
+    <button onclick="showUserGuide()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+      <i class="fa-solid fa-circle-info w-5 text-center text-slate-500"></i><span>Petunjuk Penggunaan</span>
+    </button>
+    
+    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Pencapaian</div>
+    <button onclick="navigate('leaderboard')" data-nav="leaderboard" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-trophy w-5 text-center text-slate-500"></i><span>Papan Skor</span></button>
+    <button onclick="navigate('sertifikat')" data-nav="sertifikat" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-award w-5 text-center text-slate-500"></i><span>Sertifikat</span></button>
+    <button onclick="navigate('ai')" data-nav="ai" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-robot w-5 text-center text-slate-500"></i><span>AI Tutor</span><span class="ml-auto text-[9px] bg-accent-500 text-white px-1.5 py-0.5 rounded-full font-bold">NEW</span></button>
+    
+    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Guru</div>
+    <button onclick="handleTeacherAccess()" id="teacher-access-btn" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+      <i class="fa-solid fa-chalkboard-user w-5 text-center text-slate-500"></i>
+      <span id="teacher-access-text">Login Guru</span>
+    </button>
+  </nav>
+  <div class="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+    <div class="bg-gradient-to-br from-brand-500 to-accent-500 rounded-xl p-3 text-white">
+      <div class="flex items-center justify-between mb-2"><span class="text-xs font-bold opacity-90"><i class="fa-solid fa-bullseye mr-1"></i>Misi Hari Ini</span><span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full" id="sidebar-mission-count">0/4</span></div>
+      <div class="text-xs opacity-90 mb-2" id="sidebar-mission-text">Selesaikan 1 materi</div>
+      <div class="h-1.5 bg-white/20 rounded-full overflow-hidden"><div id="sidebar-mission-bar" class="h-full bg-white progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="text-center">
+      <p class="text-[10px] text-slate-500 dark:text-slate-400">Dibuat oleh:</p>
+      <p class="text-xs font-bold text-brand-600 dark:text-brand-400 tracking-wide">OKTAPIA JASMAN</p>
+    </div>
+  </div>
+</aside>
+
+<div id="mobile-sidebar" class="fixed inset-0 z-50 hidden lg:hidden">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeMobileSidebar()"></div>
+  <div class="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-slate-900 shadow-2xl overflow-y-auto flex flex-col">
+    <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2"><div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white"><i class="fa-solid fa-graduation-cap"></i></div><span class="font-display font-bold">Arkasila</span></div>
+      <button onclick="closeMobileSidebar()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <nav class="p-3 space-y-1 flex-grow">
+      <button onclick="navigate('home');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-house w-5 text-center text-brand-500"></i>Beranda</button>
+      <button onclick="navigate('dashboard');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-chart-line w-5 text-center text-brand-500"></i>Dashboard</button>
+      <button onclick="navigate('materi');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-book-open w-5 text-center text-brand-500"></i>Materi</button>
+      <button onclick="navigate('video');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-video w-5 text-center text-brand-500"></i>Video Materi</button>
+      <button onclick="navigate('kuis');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-circle-question w-5 text-center text-brand-500"></i>Kuis</button>
+      <button onclick="navigate('game');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-gamepad w-5 text-center text-brand-500"></i>Game Edukasi</button>
+      
+      <hr class="my-2 border-slate-200 dark:border-slate-700">
+      
+      <button onclick="showUserGuide();closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+        <i class="fa-solid fa-circle-info w-5 text-center text-brand-500"></i>Petunjuk Penggunaan
+      </button>
+      
+      <button onclick="navigate('leaderboard');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-trophy w-5 text-center text-brand-500"></i>Papan Skor</button>
+      <button onclick="navigate('sertifikat');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-award w-5 text-center text-brand-500"></i>Sertifikat</button>
+      <button onclick="navigate('ai');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-robot w-5 text-center text-brand-500"></i>AI Tutor <span class="ml-auto text-[9px] bg-accent-500 text-white px-1.5 py-0.5 rounded-full font-bold">NEW</span></button>
+      
+      <hr class="my-2 border-slate-200 dark:border-slate-700">
+      
+      <button onclick="handleTeacherAccess();closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+        <i class="fa-solid fa-chalkboard-user w-5 text-center text-brand-500"></i>
+        <span id="m-teacher-access-text">Login Guru</span>
+      </button>
+    </nav>
+    <div class="p-4 mt-auto border-t border-slate-200 dark:border-slate-700 text-center">
+      <p class="text-[10px] text-slate-500 dark:text-slate-400">Dibuat oleh:</p>
+      <p class="text-xs font-bold text-brand-600 dark:text-brand-400 tracking-wide">OKTAPIA JASMAN</p>
+    </div>
+  </div>
+</div>
+
+<main id="main-content" class="lg:ml-64 pb-24 lg:pb-8 min-h-[calc(100vh-4rem)]">
+  <div id="view-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-6"></div>
+</main>
+
+<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-200/50 dark:border-slate-700/50">
+  <div class="grid grid-cols-5 h-16">
+    <button onclick="navigate('home')" class="bottom-nav-item active flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-house text-sm"></i></div><span class="text-[10px] font-medium">Beranda</span></button>
+    <button onclick="navigate('materi')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-book-open text-sm"></i></div><span class="text-[10px] font-medium">Materi</span></button>
+    <button onclick="navigate('kuis')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center relative"><i class="fa-solid fa-circle-question text-sm"></i></div><span class="text-[10px] font-medium">Kuis</span></button>
+    <button onclick="navigate('game')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-gamepad text-sm"></i></div><span class="text-[10px] font-medium">Game</span></button>
+    <button onclick="navigate('dashboard')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-user text-sm"></i></div><span class="text-[10px] font-medium">Profil</span></button>
+  </div>
+</nav>
+
+<button id="ai-fab" onclick="navigate('ai')" class="fixed bottom-20 lg:bottom-6 right-4 z-30 w-14 h-14 rounded-full bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-xl shadow-brand-500/40 flex items-center justify-center hover:scale-110 transition relative">
+  <i class="fa-solid fa-robot text-xl"></i>
+</button>
+
+<div id="toast-container" class="fixed top-20 right-4 z-[100] space-y-2 max-w-sm w-[calc(100%-2rem)] sm:w-auto"></div>
+
+<!-- Modal Container -->
+<div id="modal-container" class="fixed inset-0 z-[90] hidden flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal()"></div>
+  <div id="modal-content" class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto modal-enter"></div>
+</div>
+
+<script>
+// DATA & STATE
+const materiData = [
+  { 
+    id: 1, 
+    title: "Kebudayaan dalam Masyarakat Indonesia", 
+    icon: "fa-people-group", 
+    color: "from-brand-500 to-brand-600", 
+    duration: "10 menit", 
+    summary: "Memahami konsep kebudayaan, unsur universal, wujud budaya, serta hubungan budaya daerah dan nasional.", 
+    image: "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=800&q=80", 
+    content: [ 
+      { type: 'heading', text: 'Pengertian Kebudayaan' }, 
+      { type: 'paragraph', text: 'Kebudayaan berasal dari bahasa Sanskerta "buddhayah" yang berarti budi atau akal. Kebudayaan adalah segala hasil cipta, rasa, dan karsa manusia. Ki Hajar Dewantara menekankan peran kekuatan jiwa manusia dalam kebudayaan.' }, 
+      { type: 'highlight', icon: 'fa-lightbulb', text: 'Selo Soemardjan dan Soelaeman Soemardi melihat kebudayaan mencakup hasil karya, rasa, dan cipta masyarakat, yang dapat berupa benda material (teknologi), nilai sosial, maupun kemampuan mental (filsafat, ilmu pengetahuan).' }, 
+      { type: 'heading', text: 'Unsur dan Wujud Budaya' }, 
+      { type: 'paragraph', text: 'Menurut Clyde Kluckhohn, ada tujuh unsur universal kebudayaan: bahasa, sistem pengetahuan, organisasi kemasyarakatan, peralatan hidup dan teknologi, mata pencarian, religi, dan kesenian.' }, 
+      { type: 'highlight', icon: 'fa-shapes', text: 'Wujud budaya terbagi tiga: 1) Gagasan (Wujud Ideal) - ide & nilai abstrak; 2) Activitas (Tindakan) - pola interaksi; 3) Artefak (Karya) - benda fisik konkret.' }, 
+      { type: 'heading', text: 'Budaya Daerah dan Budaya Nasional' },
+      { type: 'paragraph', text: 'Indonesia memiliki beragam suku bangsa dengan keunikan budaya daerahnya. Budaya nasional terbentuk dari interaksi dan nilai-nilai bersama seluruh budaya daerah, menjadi puncak kebudayaan daerah tersebut (seperti gotong royong, kekeluargaan).' },
+      { type: 'highlight', icon: 'fa-star', text: 'Kebudayaan nasional memberi identitas bangsa, dan setiap warga negara diharapkan mendukung dan melestarikannya.' }
+    ], 
+    keyPoints: [ 
+      "Kebudayaan berasal dari 'buddhayah' (budi/akal)",
+      "7 unsur universal: bahasa, pengetahuan, organisasi, teknologi, pencarian, religi, seni",
+      "3 wujud budaya: Gagasan, Aktivitas, Artefak",
+      "Budaya nasional adalah puncak dari budaya daerah"
+    ] 
+  },
+  { 
+    id: 2, 
+    title: "Perubahan Kebudayaan dalam Masyarakat", 
+    icon: "fa-arrows-rotate", 
+    color: "from-accent-500 to-accent-600", 
+    duration: "12 menit", 
+    summary: "Mengenal hakekat, bentuk, faktor penyebab, dan dampak perubahan sosial budaya.", 
+    image: "https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?w=800&q=80", 
+    content: [ 
+      { type: 'heading', text: 'Hakekat Perubahan Kebudayaan' }, 
+      { type: 'paragraph', text: 'Perubahan budaya mencakup perubahan pada setiap cabang kebudayaan, termasuk ilmu pengetahuan, teknologi, seni, filsafat, dan organisasi sosial. Kingsley Davis dan Soerjono Soekanto menekankan bahwa perubahan sosial dan budaya sulit dipisahkan.' }, 
+      { type: 'highlight', icon: 'fa-clock', text: 'Bentuk perubahan berdasarkan waktu: Evolusi (lambat) dan Revolusi (cepat).' },
+      { type: 'highlight', icon: 'fa-clipboard-list', text: 'Bentuk perubahan berdasarkan perencanaan: Dikehendaki (direncanakan) dan Tidak dikehendaki.' },
+      { type: 'paragraph', text: 'Faktor penyebab perubahan terbagi menjadi Internal (perubahan penduduk, penemuan baru, pertentangan/konflik, pemberontakan/revolusi) dan Eksternal (lingkungan alam/fisik, peperangan, pengaruh kebudayaan lain).' },
+      { type: 'highlight', icon: 'fa-triangle-exclamation', text: 'Dampak negatif perubahan budaya mencakup disintegrasi, anomi, cultural lag (ketertinggalan budaya), mestizo culture, individualisme, materialisme, hingga kesenjangan sosial.' }
+    ], 
+    keyPoints: [ 
+      "Perubahan sosial dan budaya sulit dipisahkan",
+      "Bentuk: Evolusi vs Revolusi, Dikehendaki vs Tidak, Progresif vs Regresif",
+      "Faktor Internal: penduduk, penemuan, konflik",
+      "Faktor Eksternal: lingkungan, perang, budaya asing"
+    ] 
+  },
+  { 
+    id: 3, 
+    title: "Kearifan Lokal Menghadapi Perubahan", 
+    icon: "fa-shield-halved", 
+    color: "from-purple-500 to-purple-600", 
+    duration: "10 menit", 
+    summary: "Memahami ciri, karakteristik, fungsi kearifan lokal, serta apresiasi produk budaya.", 
+    image: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=80", 
+    content: [ 
+      { type: 'heading', text: 'Apa itu Kearifan Lokal?' }, 
+      { type: 'paragraph', text: 'Kearifan lokal (local wisdom) perlu dikedepankan sebagai modal bersama menghadapi perubahan. Ini mencakup kebijakan, pengetahuan, dan kecerdasan setempat yang digunakan secara turun-temurun dalam mengelola lingkungan fisik dan sosial.' }, 
+      { type: 'highlight', icon: 'fa-brain', text: 'Ciri Kearifan Lokal: Mampu mengendalikan budaya luar, bertahan dari pengaruh luar, mengakomodasi perkembangan budaya, dan memadukan budaya luar ke dalam budaya asli.' }, 
+      { type: 'paragraph', text: 'Karakteristik kearifan lokal menggabungkan pengetahuan etika dan moral, mengajarkan cinta alam, berasal dari komunitas, dan berbentuk nilai, norma, serta adat istiadat.' },
+      { type: 'highlight', icon: 'fa-bullseye', text: 'Fungsi Kearifan Lokal: Konservasi sumber daya alam, pengembangan SDM, pengembangan kebudayaan/ilmu pengetahuan, dan penuntun perilaku etis/moral.' },
+      { type: 'paragraph', text: 'Produk budaya hasil kearifan lokal berupa Barang Budaya (cultural goods) seperti bangunan warisan dan makanan tradisional, serta Jasa Budaya (cultural services) seperti pertunjukan dan pariwisata budaya.' }
+    ], 
+    keyPoints: [ 
+      "Kearifan lokal = local wisdom, pengetahuan turun-temurun",
+      "Ciri: mengendalikan, bertahan, mengakomodasi, memadukan budaya luar",
+      "Fungsi: konservasi alam, pengembangan SDM & ilmu, penuntun etika",
+      "Produk budaya: Barang Budaya & Jasa Budaya"
+    ] 
+  },
+  { 
+    id: 4, 
+    title: "Menanggapi Perubahan Budaya", 
+    icon: "fa-hand-fist", 
+    color: "from-orange-500 to-red-600", 
+    duration: "12 menit", 
+    summary: "Sikap bijak dalam menghadapi perubahan dengan Pancasila dan pelestarian budaya.", 
+    image: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80", 
+    content: [ 
+      { type: 'heading', text: 'Sikap dalam Menghadapi Perubahan' }, 
+      { type: 'paragraph', text: 'Keberagaman budaya Indonesia adalah daya tarik dunia dan identitas yang harus dihormati. Kita perlu bersikap bijak menghadapi perubahan, dengan memperkokoh nilai-nilai karakter budaya bangsa, berpegang pada Pancasila dan UUD NRI Tahun 1945.' }, 
+      { type: 'highlight', icon: 'fa-scale-balanced', text: 'Pancasila digunakan sebagai ideologi terbuka untuk menyaring pengaruh luar dan menolak nilai negatif seperti radikalisme, hedonisme, konsumerisme, dan hoaks.' }, 
+      { type: 'paragraph', text: 'Pemberdayaan masyarakat berbasis kearifan lokal meliputi enabling (memungkinkan), empowering (memberdayakan), dan protecting (melindungi).' },
+      { type: 'highlight', icon: 'fa-people-arrows', text: 'Pemberdayaan ini mengandung nilai kebijaksanaan, kemanusiaan, keterbukaan, integritas, dan kedinamisan.' },
+      { type: 'paragraph', text: 'Pengembangan kebudayaan dapat diwujudkan dalam kegiatan nyata seperti karnaval, festival pakaian/makanan tradisional, dan kegiatan budaya lainnya agar jati diri bangsa tetap lestari.' }
+    ], 
+    keyPoints: [ 
+      "Berpegang pada Pancasila & UUD 1945",
+      "Menolak radikalisme, hedonisme, konsumerisme, hoaks",
+      "Pemberdayaan: Enabling, Empowering, Protecting",
+      "Pelestarian budaya melalui festival dan kegiatan nyata"
+    ] 
+  }
+];
+
+const videoData = [
+  { id: 1, title: "Persatuan & Kesatuan Indonesia (Part 1)", url: "https://res.cloudinary.com/dcz8y4n3z/video/upload/v1782137294/vidssave.com_Persatuan_dan_kesatuan_indonesia_part_1_720P_jp4e6p.mp4", type: 'mp4', hasEvaluation: true, summary: "Memahami makna dan pentingnya persatuan dan kesatuan dalam kehidupan berbangsa dan bernegara." },
+  { id: 2, title: "Persatuan & Kesatuan Indonesia (Part 2) - Dampaknya", url: "https://res.cloudinary.com/dcz8y4n3z/video/upload/v1782138317/vidssave.com_PERSATUAN_DAN_KESATUAN_INDONESIA_PART_2_DAMPAKNYA_720P_jhk41p.mp4", type: 'mp4', hasEvaluation: true, summary: "Menganalisis dampak positif dan pentingnya menjaga persatuan dalam menghadapi berbagai tantangan." }
+];
+
+const quizQuestions = [
+  { id: 1, type: 'pg', question: 'Berikut yang bukan penyebab adanya keberagaman di Indonesia adalah………', options: ['Letak geografis', 'Kondisi alam', 'Kemaritiman Indonesia', 'Keterbukaan masyarakat akan budaya baru'], answer: 2, explanation: 'Kemaritiman Indonesia bukan penyebab keberagaman, melainkan karakteristik negara.' },
+  { id: 2, type: 'pg', question: 'Suku bangsa Bugis, Makassar, Toraja, dan Minahasa merupakan suku bangsa yang berasal dari……...', options: ['Jawa', 'Bali', 'Kalimantan', 'Sulawesi'], answer: 3, explanation: 'Suku-suku tersebut berdomisili di Pulau Sulawesi.' },
+  { id: 3, type: 'pg', question: 'Ciri-ciri: kulit putih, hidung mancung, rambut pirang kemerahan hingga coklat kehitaman, kelopak mata lurus. Merupakan ciri ras…', options: ['Mongoloid', 'Kaukasoid', 'Negroid', 'Australoid'], answer: 1, explanation: 'Ciri-ciri tersebut dimiliki oleh ras Kaukasoid.' },
+  { id: 4, type: 'pg', question: 'Semboyan Bhinneka Tunggal Ika sangat cocok diterapkan di Indonesia karena……', options: ['Masyarakat Indonesia adalah masyarakat yang majemuk', 'Indonesia sering mengalami konflik', 'Bentuk negara Indonesia adalah negara kesatuan', 'Dengan bersatu membuat bangsa menjadi kuat'], answer: 0, explanation: 'Masyarakat Indonesia yang majemuk (beragam) menjadi alasan kuat diterapkannya Bhinneka Tunggal Ika.' },
+  { id: 5, type: 'pg', question: 'Prinsip dalam Bhinneka Tunggal Ika di mana perbedaan harus dicari titik temunya adalah….', options: ['Inklusif', 'Kepercayaan', 'Konvergen', 'Persatuan'], answer: 2, explanation: 'Konvergen berarti menuju satu titik temu, mempertemukan perbedaan.' },
+  { id: 6, type: 'pg', question: 'Sikap menghargai teman berbeda latar belakang dan tidak melakukan diskriminasi disebut……', options: ['Fanatisme', 'Toleransi', 'Nasionalisme', 'Menang sendiri'], answer: 1, explanation: 'Toleransi adalah sikap menghargai dan menerima perbedaan.' },
+  { id: 7, type: 'pg', question: 'Hal yang akan terjadi apabila masyarakat menolak bekerja sama adalah….', options: ['Relasi bangsa Indonesia semakin sempit', 'Terjadinya penurunan kualitas budaya', 'Timbulnya sikap acuh tak acuh antar sesama', 'Pekerjaan masyarakat tidak akan selesai'], answer: 0, explanation: 'Penolakan kerja sama menyebabkan relasi antar warga menjadi terhambat dan sempit.' },
+  { id: 8, type: 'pg', question: 'Berikut yang bukan sikap untuk menjaga kebhinekaan adalah….', options: ['Membangun hubungan harmonis', 'Bekerja sama dengan orang lain', 'Saling menghargai', 'Menjaga kebersihan lingkungan tempat tinggal'], answer: 3, explanation: 'Menjaga kebersihan adalah hal baik, namun bukan fokus utama dalam menjaga kebhinekaan (keragaman).' },
+  { id: 9, type: 'pg', question: 'Sikap yang sebaiknya tidak dilakukan di lingkungan pluralisme adalah……', options: ['Saling menghormati perbedaan', 'Berteman dengan semua suku', 'Mempermasalahkan perbedaan karakteristik suku', 'Mempererat silaturahmi'], answer: 2, explanation: 'Mempermasalahkan perbedaan akan memicu konflik dan merusak persatuan.' },
+  { id: 10, type: 'pg', question: 'Raka memiliki tekad dan keinginan kuat mengadakan kegiatan kebudayaan. Sesuai kekuatan jiwa Ki Hajar Dewantara yaitu…….', options: ['Cipta', 'Rasa', 'Karsa', 'Asa'], answer: 2, explanation: 'Karsa adalah kehendak atau keinginan kuat untuk mewujudkan sesuatu.' },
+  { id: 11, type: 'pg', question: 'Alasan gagasan kebudayaan bersifat abstrak adalah……', options: ['Tidak dilihat secara kasat mata, diraba, atau disentuh', 'Merupakan wujud kompleks yang sulit diprediksi', 'Nilai-nilainya tidak tetap (dinamis)', 'Merupakan perpaduan banyak unsur'], answer: 0, explanation: 'Abstrak karena berupa ide atau nilai yang tidak berwujud fisik.' },
+  { id: 12, type: 'pg', question: 'Perubahan budaya pasti terjadi dalam kehidupan masyarakat karena….', options: ['Pola pikir manusia berkembang', 'Faktor eksternal seperti globalisasi', 'Budaya bersifat dinamis dan tidak kaku', 'Keinginan masyarakat untuk berubah'], answer: 2, explanation: 'Hakekat budaya itu sendiri adalah dinamis dan terus berkembang.' },
+  { id: 13, type: 'pg', question: 'Perubahan dikehendaki dan tak dikehendaki merupakan bentuk perubahan dilihat dari………', options: ['Waktu', 'Perencanaan', 'Hasil', 'Pengaruh'], answer: 1, explanation: 'Berdasarkan perencanaannya, perubahan dibagi menjadi yang dikehendaki (direncanakan) dan tidak dikehendaki.' },
+  { id: 14, type: 'pg', question: 'Tradisi tana’ulen (“hutan larangan”) berasal dari wilayah…', options: ['Bali', 'Jawa Tengah', 'Sulawesi Selatan', 'Kalimantan Timur'], answer: 3, explanation: 'Tana’ulen adalah kearifan lokal dari Kalimantan Timur.' },
+  { id: 15, type: 'pg', question: 'Masyarakat Kampung Dukuh memanfaatkan hutan dengan hati-hati karena……', options: ['Kearifan lokal mengajarkan etika dan nilai moral terhadap alam', 'Adanya larangan petuah orang terdahulu yang harus dipatuhi', 'Hakikatnya mengajarkan menciptakan alam bukan menghancurkannya', 'Hutan adat menyimpan misteri'], answer: 0, explanation: 'Kearifan lokal mengandung pengetahuan etika dan moral untuk menjaga alam.' },
+  { id: 16, type: 'pg', question: 'Salah satu keuntungan letak Indonesia secara geologis adalah…….', options: ['Banyak gunung api sehingga tanah subur', 'Jalur perdagangan Asia-Australia', 'Melimpahnya hasil laut', 'Banyak lahan industri'], answer: 0, explanation: 'Letak geologis di pertemuan lempeng menghasilkan gunung api yang membawa kesuburan tanah.' },
+  { id: 17, type: 'pg', question: 'Berikut yang bukan ciri-ciri negara kesatuan adalah….', options: ['Wewenang tertinggi dipegang pusat', 'Setiap negara memiliki kekuasaan sendiri', 'Hanya memiliki satu kepala negara', 'Kedaulatan ke dalam dan luar dipegang pusat'], answer: 1, explanation: 'Memiliki kekuasaan sendiri secara mutlak adalah ciri negara federasi/serikat.' },
+  { id: 18, type: 'pg', question: 'Usulan negara federasi dengan kerajaan-kecil tetap hidup dikemukakan oleh….', options: ['Muhammad Yamin', 'Mohammad Hatta', 'R. Abdoelrahim Pratalykrama', 'Soekarno'], answer: 2, explanation: 'R. Abdoelrahim Pratalykrama mengusulkan bentuk federasi dalam sidang BPUPKI.' },
+  { id: 19, type: 'pg', question: 'Bentuk serikat (federasi) RIS didasarkan pada pasal yang berbunyi….', options: ['Negara hukum demokrasi berbentuk kesatuan', 'Menjaga persatuan dan kesatuan', 'Negara hukum demokrasi berbentuk federasi', 'Berdaulat dengan bentuk negara kesatuan'], answer: 2, explanation: 'Konstitusi RIS menegaskan bentuk negara federasi.' },
+  { id: 20, type: 'pg', question: 'Perwujudan menciptakan persatuan dalam lingkup masyarakat adalah……', options: ['Menghormati teman sekelas beda agama', 'Mengakui fungsi anggota keluarga', 'Keterbukaan antar anggota keluarga', 'Hidup rukun tanpa membedakan ras di masyarakat'], answer: 3, explanation: 'Lingkup masyarakat yang luas tercermin dari hidup rukun antar warga tanpa membedakan ras/suku.' }
+];
+
+const badgesData = [
+  { id: 'first-step', name: 'Langkah Pertama', desc: 'Selesaikan 1 materi', icon: 'fa-shoe-prints', color: 'from-brand-500 to-brand-600', condition: s => s.completedMateri.length >= 1 },
+  { id: 'smart-quiz', name: 'Cendekia', desc: 'Dapat nilai 100 di kuis', icon: 'fa-brain', color: 'from-purple-500 to-purple-600', condition: s => s.quizScores.some(q => q.score === 100) },
+  { id: 'streak-3', name: 'Konsisten', desc: '3 hari streak belajar', icon: 'fa-fire', color: 'from-orange-500 to-red-500', condition: s => s.streak >= 3 },
+  { id: 'champion', name: 'Sang Juara', desc: 'Selesaikan semua materi', icon: 'fa-crown', color: 'from-yellow-500 to-amber-500', condition: s => s.completedMateri.length >= materiData.length },
+  { id: 'ai-friend', name: 'Sahabat AI', desc: 'Chat dengan AI Tutor', icon: 'fa-robot', color: 'from-slate-600 to-slate-800', condition: s => s.aiChatted },
+  { id: 'quiz-master', name: 'Raja Kuis', desc: 'Selesaikan 1 kuis', icon: 'fa-trophy', color: 'from-pink-500 to-rose-500', condition: s => s.quizScores.length >= 1 },
+];
+
+const defaultState = {
+  user: { id: 'current_user', isCurrentUser: true, name: 'Siswa Arkasila', avatar: 'SA', kelas: '7A', sekolah: 'SMP Arkasila', catatanGuru: 'Pertahankan semangat belajarmu!', xp: 0, level: 1, streak: 0, lastActiveDate: null, completedMateri: [], quizScores: [], gamesWon: [], badges: [], visitedPages: [], aiChatted: false, videoEvaluationsCompleted: [], missions: { materi: false, kuis: false, game: false, ai: false }, dailyMissionDate: null },
+  students: null, 
+  theme: 'light', currentView: 'home', currentMateri: 0, isTeacher: false
+};
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('arkasila-state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (!parsed.user.visitedPages) parsed.user.visitedPages = [];
+      if (!parsed.user.videoEvaluationsCompleted) parsed.user.videoEvaluationsCompleted = [];
+      if (!parsed.students) parsed.students = [];
+      if (parsed.isTeacher === undefined) parsed.isTeacher = false;
+      
+      const currentUserInList = parsed.students.find(s => s.id === 'current_user');
+      if (!currentUserInList) {
+         parsed.students.unshift({
+            id: 'current_user', isCurrentUser: true, name: parsed.user.name, avatar: parsed.user.avatar,
+            kelas: parsed.user.kelas, sekolah: parsed.user.sekolah, xp: parsed.user.xp,
+            level: parsed.user.level, city: 'Lokal', catatanGuru: parsed.user.catatanGuru
+         });
+      }
+      return { ...defaultState, ...parsed, user: { ...defaultState.user, ...parsed.user } };
+    }
+  } catch (e) { console.error('Load state error:', e); }
+  
+  const freshState = JSON.parse(JSON.stringify(defaultState));
+  freshState.students = [
+    { id: 'current_user', isCurrentUser: true, name: freshState.user.name, avatar: freshState.user.avatar,
+      kelas: freshState.user.kelas, sekolah: freshState.user.sekolah, xp: freshState.user.xp,
+      level: freshState.user.level, city: 'Lokal', catatanGuru: freshState.user.catatanGuru
+    }
+  ];
+  return freshState;
+}
+
+function saveState() { 
+  try { 
+    const idx = state.students.findIndex(s => s.id === 'current_user');
+    if (idx !== -1) {
+      state.students[idx].name = state.user.name;
+      state.students[idx].avatar = state.user.avatar;
+      state.students[idx].kelas = state.user.kelas;
+      state.students[idx].sekolah = state.user.sekolah;
+      state.students[idx].xp = state.user.xp;
+      state.students[idx].level = state.user.level;
+      state.students[idx].catatanGuru = state.user.catatanGuru;
+    }
+    localStorage.setItem('arkasila-state', JSON.stringify(state)); 
+  } catch (e) { console.error('Save error:', e); } 
+}
+
+function calculateLevel(xp) { const t = [0, 100, 300, 600, 1000, 1500, 2200, 3000]; let l = 1; for (let i = 0; i < t.length; i++) { if (xp >= t[i]) l = i + 1; } return l; }
+function getLevelTitle(level) { return ['', 'Pemula', 'Pelajar Aktif', 'Cermelang', 'Bintang Terang', 'Sang Juara', 'Master', 'Legenda'][level] || 'Legenda'; }
+function getLevelProgress(xp) { const t = [0, 100, 300, 600, 1000, 1500, 2200, 3000]; const level = calculateLevel(xp); if (level >= t.length) return { current: xp, needed: t[t.length-1], percent: 100 }; const cL = t[level - 1]; const nL = t[level]; return { current: xp - cL, needed: nL - cL, percent: ((xp - cL) / (nL - cL)) * 100 }; }
+function xpForNextLevel(xp) { const t = [0, 100, 300, 600, 1000, 1500, 2200, 3000]; const l = calculateLevel(xp); return t[l] || t[t.length-1]; }
+
+function addXP(amount, reason = '') {
+  const oldLevel = state.user.level;
+  state.user.xp += amount;
+  state.user.level = calculateLevel(state.user.xp);
+  saveState(); updateHeader();
+  if (amount > 0) showToast(`+${amount} XP ${reason ? '• ' + reason : ''}`, 'success', 'fa-bolt');
+  if (state.user.level > oldLevel) {
+    setTimeout(() => { showToast(`Naik ke Level ${state.user.level} - ${getLevelTitle(state.user.level)}!`, 'levelup', 'fa-star'); launchConfetti(); }, 600);
+  }
+  checkBadges();
+}
+
+function checkBadges() {
+  badgesData.forEach(badge => {
+    if (!state.user.badges.includes(badge.id) && badge.condition(state.user)) {
+      state.user.badges.push(badge.id); saveState();
+      setTimeout(() => showToast(`Badge baru: ${badge.name}!`, 'badge', 'fa-medal'), 800);
+    }
+  });
+}
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (state.user.lastActiveDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    state.user.streak = (state.user.lastActiveDate === yesterday || state.user.lastActiveDate === null) ? state.user.streak + 1 : 1;
+    state.user.lastActiveDate = today; saveState();
+  }
+}
+function checkDailyMissionsReset() { const today = new Date().toDateString(); if (state.user.dailyMissionDate !== today) { state.user.missions = { materi: false, kuis: false, game: false, ai: false }; state.user.dailyMissionDate = today; saveState(); } }
+function completeMission(type) { checkDailyMissionsReset(); if (!state.user.missions[type]) { state.user.missions[type] = true; saveState(); const xpMap = { materi: 30, kuis: 40, game: 30, ai: 20 }; addXP(xpMap[type], 'Misi harian'); updateMissionSidebar(); } }
+function updateMissionSidebar() {
+  checkDailyMissionsReset();
+  const m = state.user.missions; const done = Object.values(m).filter(v => v).length;
+  const elC = document.getElementById('sidebar-mission-count'); const elB = document.getElementById('sidebar-mission-bar'); const elT = document.getElementById('sidebar-mission-text');
+  if (elC) elC.textContent = `${done}/4`;
+  if (elB) elB.style.width = `${(done/4)*100}%`;
+  if (elT) elT.textContent = !m.materi ? 'Selesaikan 1 materi' : !m.kuis ? 'Kerjakan 1 kuis' : !m.game ? 'Mainkan 1 game' : !m.ai ? 'Chat dengan AI' : 'Semua misi selesai!';
+}
+
+function showToast(message, type = 'info', icon = 'fa-info-circle') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  const colors = { success: 'bg-accent-500', error: 'bg-red-500', info: 'bg-brand-500', warning: 'bg-orange-500', badge: 'bg-gradient-to-r from-purple-500 to-pink-500', levelup: 'bg-gradient-to-r from-yellow-400 to-orange-500' };
+  toast.className = `toast-enter ${colors[type] || colors.info} text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3 min-w-[280px]`;
+  toast.innerHTML = `<div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid ${icon}"></i></div><div class="text-sm font-medium flex-1">${message}</div><button onclick="this.parentElement.classList.add('toast-exit'); setTimeout(()=>this.parentElement.remove(), 300)" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-sm"></i></button>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 300); }, 4500);
+}
+function launchConfetti() { const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']; for (let i = 0; i < 50; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + '%'; c.style.top = '-20px'; c.style.background = colors[Math.floor(Math.random() * colors.length)]; c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px'; c.style.animationDelay = Math.random() * 0.5 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 5000); } }
+
+function toggleTheme() { state.theme = state.theme === 'light' ? 'dark' : 'light'; applyTheme(); saveState(); }
+function applyTheme() {
+  if (state.theme === 'dark') { document.documentElement.classList.add('dark'); document.getElementById('theme-icon').className = 'fa-solid fa-sun text-lg'; }
+  else { document.documentElement.classList.remove('dark'); document.getElementById('theme-icon').className = 'fa-solid fa-moon text-lg'; }
+}
+
+function showNotifications() { showToast('Tidak ada notifikasi baru', 'info', 'fa-bell'); }
+
+function openModal(html) {
+  const container = document.getElementById('modal-container');
+  document.getElementById('modal-content').innerHTML = html;
+  container.classList.remove('hidden');
+}
+function closeModal() {
+  document.getElementById('modal-container').classList.add('hidden');
+}
+
+function showUserGuide() {
+  const html = `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-circle-info text-brand-500"></i> Petunjuk Penggunaan Arkasila</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+      <div class="flex gap-3">
+        <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/40 text-brand-600 flex items-center justify-center flex-shrink-0 font-bold">1</div>
+        <div><strong>Belajar Materi:</strong> Buka menu <i>Materi</i> untuk membaca dan memahami pembelajaran. Selesaikan setiap bab untuk mendapatkan XP.</div>
+      </div>
+      <div class="flex gap-3">
+        <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/40 text-brand-600 flex items-center justify-center flex-shrink-0 font-bold">2</div>
+        <div><strong>Tonton Video & Evaluasi:</strong> Akses menu <i>Video Materi</i>. Tonton video hingga selesai, lalu kerjakan <i>Evaluasi Kritis</i> untuk melatih berpikir kritis dan dapatkan bonus XP.</div>
+      </div>
+      <div class="flex gap-3">
+        <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/40 text-brand-600 flex items-center justify-center flex-shrink-0 font-bold">3</div>
+        <div><strong>Kerjakan Kuis:</strong> Buka menu <i>Kuis</i> untuk menguji pemahamanmu. Jawab minimal 15 soal dengan benar agar berhak mendapatkan <i>Sertifikat</i>.</div>
+      </div>
+      <div class="flex gap-3">
+        <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/40 text-brand-600 flex items-center justify-center flex-shrink-0 font-bold">4</div>
+        <div><strong>Game & AI Tutor:</strong> Mainkan <i>Game Edukasi</i> untuk mengumpulkan XP santai. Jika bingung, tanyakan langsung kepada <i>AI Tutor</i>!</div>
+      </div>
+      <div class="flex gap-3">
+        <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/40 text-brand-600 flex items-center justify-center flex-shrink-0 font-bold">5</div>
+        <div><strong>Dashboard & Sertifikat:</strong> Pantau peringkatmu di <i>Papan Skor</i> dan cek perkembanganmu di <i>Dashboard</i>. Jika syarat terpenuhi, cetak <i>Sertifikat</i> milikmu!</div>
+      </div>
+    </div>
+  `;
+  openModal(html);
+}
+
+function navigate(view, params = {}) {
+  if (view === 'teacher' && !state.isTeacher) {
+      handleTeacherAccess();
+      return;
+  }
+  state.currentView = view;
+  if (!state.user.visitedPages.includes(view)) state.user.visitedPages.push(view);
+  saveState();
+  document.querySelectorAll('[data-nav]').forEach(el => el.classList.remove('active'));
+  const activeNav = document.querySelector(`[data-nav="${view}"]`);
+  if (activeNav) activeNav.classList.add('active');
+  document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+  if (['home', 'materi', 'kuis', 'game', 'dashboard'].includes(view)) {
+    document.querySelector(`.bottom-nav-item[onclick*="${view}"]`)?.classList.add('active');
+  }
+  const container = document.getElementById('view-container');
+  container.innerHTML = '';
+  container.classList.remove('view-enter'); void container.offsetWidth; container.classList.add('view-enter');
+  switch(view) {
+    case 'home': renderHome(); break;
+    case 'dashboard': renderDashboard(); break;
+    case 'materi': renderMateri(params); break;
+    case 'video': renderVideo(); break;
+    case 'kuis': renderKuis(params); break;
+    case 'game': renderGame(); break;
+    case 'leaderboard': renderLeaderboard(); break;
+    case 'sertifikat': renderSertifikat(); break;
+    case 'ai': renderAI(); break;
+    case 'teacher': renderTeacher(); break;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  checkBadges();
+}
+function toggleSidebar() { document.getElementById('mobile-sidebar').classList.remove('hidden'); }
+function closeMobileSidebar() { document.getElementById('mobile-sidebar').classList.add('hidden'); }
+
+function updateHeader() {
+  document.getElementById('header-level').textContent = state.user.level;
+  document.getElementById('header-xp').textContent = state.user.xp;
+  document.getElementById('header-streak').textContent = state.user.streak;
+  document.getElementById('header-name').textContent = state.user.name;
+  document.getElementById('header-avatar').textContent = state.user.avatar;
+  document.getElementById('header-xp-bar').style.width = getLevelProgress(state.user.xp).percent + '%';
+}
+
+// Helper function for materi labels
+function getMateriLabel(idx) {
+  if (idx === 0) return `Bab 1`;
+  return `Sub 1.${idx + 1}`;
+}
+
+// === RENDER FUNCTIONS ===
+function renderHome() {
+  const totalMateri = materiData.length;
+  const completedMateri = state.user.completedMateri.length;
+  const progressPercent = Math.round((completedMateri / totalMateri) * 100);
+  const isOnline = navigator.onLine;
+  document.getElementById('view-container').innerHTML = `
+    <section class="relative overflow-hidden rounded-3xl mb-8 animated-hero-bg">
+      <div class="blob bg-brand-400 w-72 h-72 top-0 right-0"></div>
+      <div class="blob bg-accent-400 w-64 h-64 bottom-0 left-1/3" style="animation-delay:-4s"></div>
+      <div class="relative p-6 sm:p-10 lg:p-14 grid lg:grid-cols-2 gap-8 items-center">
+        <div class="space-y-5">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm text-xs font-semibold text-brand-700 dark:text-brand-300 border border-white/40 dark:border-slate-700">
+            <span class="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></span> Media Pembelajaran SMP • Pendidikan Pancasila
+          </div>
+          <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] text-slate-900 dark:text-white">
+            Belajar <span class="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Pancasila</span> bersama <span class="bg-gradient-to-r from-accent-500 to-brand-600 bg-clip-text text-transparent">Arkasila</span>
+          </h1>
+          <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-xl">Pahami nilai-nilai Pancasila, kebudayaan, dan kearifan lokal Indonesia melalui materi interaktif, kuis seru, game edukatif, dan AI tutor.</p>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button onclick="navigate('materi')" class="px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-lg shadow-brand-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2"><i class="fa-solid fa-rocket"></i> Mulai Belajar</button>
+            <button onclick="navigate('video')" class="px-6 py-3 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold border border-slate-200 dark:border-slate-700 hover:border-brand-300 hover:-translate-y-0.5 transition-all flex items-center gap-2"><i class="fa-solid fa-video text-brand-500"></i> Tonton Video</button>
+          </div>
+        </div>
+        <div class="relative hidden lg:block">
+          <div class="relative w-full aspect-square max-w-md mx-auto">
+            <div class="absolute inset-0 flex items-center justify-center"><div class="w-64 h-64 rounded-full bg-gradient-to-br from-brand-500 to-accent-500 opacity:20 blur-3xl"></div></div>
+            <div class="relative w-full h-full flex items-center justify-center">
+              <svg viewBox="0 0 200 200" class="w-full h-full">
+                <defs><linearGradient id="mapGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#10b981"/></linearGradient></defs>
+                <circle cx="100" cy="100" r="80" fill="none" stroke="url(#mapGrad)" stroke-width="2" stroke-dasharray="4 4" opacity="0.5"><animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="40s" repeatCount="indefinite"/></circle>
+                <circle cx="100" cy="100" r="60" fill="none" stroke="url(#mapGrad)" stroke-width="1.5" stroke-dasharray="2 6" opacity="0.4"><animateTransform attributeName="transform" type="rotate" from="360 100 100" to="0 100 100" dur="30s" repeatCount="indefinite"/></circle>
+                <g transform="translate(100, 100)"><circle r="40" fill="url(#mapGrad)" opacity="0.9"/><text y="12" text-anchor="middle" font-size="44">🇮🇩</text></g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="mb-8">
+      <h2 class="font-display text-2xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-face-laugh-beam text-purple-500"></i> Ice Breaking</h2>
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden card-hover">
+        <div class="aspect-video bg-slate-900 flex items-center justify-center relative">
+          ${isOnline ? 
+            `<video class="w-full h-full" controls>
+               <source src="https://res.cloudinary.com/dcz8y4n3z/video/upload/v1782132109/Hawaiian_Hula_Hula_Dance_For_Kids___Luau___School_Program_Dance_Performance_for_Kids_upjsmt.mp4" type="video/mp4">
+               Browser Anda tidak mendukung tag video.
+             </video>` : 
+            `<div class="text-center text-slate-500 p-4">
+               <i class="fa-solid fa-video-slash text-4xl text-slate-600 mb-2"></i>
+               <p class="text-sm font-medium">Video Tidak Tersedia</p>
+               <p class="text-xs">Membutuhkan koneksi internet</p>
+             </div>`
+          }
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold"><i class="fa-solid fa-music"></i></div>
+            <h3 class="font-bold text-base">Yuk, Gerak & Cek Pyor!</h3>
+          </div>
+          <p class="text-xs text-slate-500">Luangkan waktu sejenak untuk meregangkan badan dan menyegarkan pikiran sebelum mulai belajar!</p>
+        </div>
+      </div>
+    </section>
+    
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+      <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-2"><div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center"><i class="fa-solid fa-book-open text-brand-600 dark:text-brand-400"></i></div><span class="text-xs text-accent-600 font-semibold">${completedMateri}/${totalMateri}</span></div>
+        <div class="text-2xl sm:text-3xl font-bold">${totalMateri}</div><div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Total Materi</div>
+      </div>
+      <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-2"><div class="w-10 h-10 rounded-xl bg-accent-100 dark:bg-accent-900/40 flex items-center justify-center"><i class="fa-solid fa-circle-question text-accent-600 dark:text-accent-400"></i></div><span class="text-xs text-accent-600 font-semibold">${quizQuestions.length} soal</span></div>
+        <div class="text-2xl sm:text-3xl font-bold">${quizQuestions.length}</div><div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Soal Kuis</div>
+      </div>
+      <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-2"><div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center"><i class="fa-solid fa-chart-line text-orange-600"></i></div><span class="text-xs text-accent-600 font-semibold">+${state.user.xp} XP</span></div>
+        <div class="text-2xl sm:text-3xl font-bold">${progressPercent}%</div><div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Progress Belajar</div>
+      </div>
+      <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-2"><div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center"><i class="fa-solid fa-medal text-purple-600"></i></div><span class="text-xs text-accent-600 font-semibold">${state.user.badges.length} diraih</span></div>
+        <div class="text-2xl sm:text-3xl font-bold">${badgesData.length}</div><div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Badge Tersedia</div>
+      </div>
+    </section>
+    <section class="mb-8">
+      <h2 class="font-display text-2xl font-bold mb-4">Menu Utama</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <button onclick="navigate('materi')" class="card-hover group text-left bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10"></div>
+          <div class="relative"><div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-book-open text-xl"></i></div>
+          <h3 class="font-display text-xl font-bold mb-1">Materi Pelajaran</h3><p class="text-sm text-white/80 mb-3">4 materi interaktif</p>
+          <div class="flex items-center gap-1 text-sm font-semibold">Pelajari <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i></div></div>
+        </button>
+        <button onclick="navigate('video')" class="card-hover group text-left bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10"></div>
+          <div class="relative"><div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-video text-xl"></i></div>
+          <h3 class="font-display text-xl font-bold mb-1">Video Materi</h3><p class="text-sm text-white/80 mb-3">Tonton video pembelajaran</p>
+          <div class="flex items-center gap-1 text-sm font-semibold">Tonton <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i></div></div>
+        </button>
+        <button onclick="navigate('kuis')" class="card-hover group text-left bg-gradient-to-br from-accent-500 to-accent-600 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10"></div>
+          <div class="relative"><div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-circle-question text-xl"></i></div>
+          <h3 class="font-display text-xl font-bold mb-1">Kuis Interaktif</h3><p class="text-sm text-white/80 mb-3">20 soal pilihan ganda</p>
+          <div class="flex items-center gap-1 text-sm font-semibold">Mulai <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i></div></div>
+        </button>
+        <button onclick="navigate('game')" class="card-hover group text-left bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10"></div>
+          <div class="relative"><div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-gamepad text-xl"></i></div>
+          <h3 class="font-display text-xl font-bold mb-1">Game Edukasi</h3><p class="text-sm text-white/80 mb-3">Memory card, tebak gambar</p>
+          <div class="flex items-center gap-1 text-sm font-semibold">Mainkan <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i></div></div>
+        </button>
+        <button onclick="navigate('ai')" class="card-hover group text-left bg-gradient-to-br from-brand-700 to-accent-700 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10"></div>
+          <div class="relative"><div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-robot text-xl"></i></div>
+          <h3 class="font-display text-xl font-bold mb-1">AI Tutor</h3><p class="text-sm text-white/80 mb-3">Tanya jawab dengan ArkaAI</p>
+          <div class="flex items-center gap-1 text-sm font-semibold">Chat <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i></div></div>
+        </button>
+        <button onclick="navigate('sertifikat')" class="card-hover group text-left bg-gradient-to-br from-yellow-500 to-amber-600 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10"></div>
+          <div class="relative"><div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-award text-xl"></i></div>
+          <h3 class="font-display text-xl font-bold mb-1">Sertifikat</h3><p class="text-sm text-white/80 mb-3">Raih sertifikat resmi</p>
+          <div class="flex items-center gap-1 text-sm font-semibold">Lihat <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i></div></div>
+        </button>
+      </div>
+    </section>
+  `;
+}
+
+function renderDashboard() {
+  const totalMateri = materiData.length;
+  const completedMateri = state.user.completedMateri.length;
+  const progressPercent = Math.round((completedMateri / totalMateri) * 100);
+  const avgScore = state.user.quizScores.length > 0 ? Math.round(state.user.quizScores.reduce((a, b) => a + b.score, 0) / state.user.quizScores.length) : 0;
+  
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6"><h1 class="font-display text-3xl font-bold mb-1">Dashboard Siswa</h1><p class="text-slate-500 dark:text-slate-400">Pantau perkembangan belajarmu</p></div>
+    <div class="grid lg:grid-cols-3 gap-4 mb-6">
+      <div class="bg-gradient-to-br from-brand-500 to-accent-500 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10"></div>
+        <button onclick="openEditProfileModal()" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-xs font-semibold transition flex items-center gap-1.5 z-10">
+          <i class="fa-solid fa-pen"></i> Edit
+        </button>
+        <div class="relative">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl font-bold">${state.user.avatar}</div>
+            <div>
+              <div class="text-xs opacity-80">Selamat datang,</div>
+              <div class="font-bold text-lg">${state.user.name}</div>
+              <div class="text-xs opacity-80">${getLevelTitle(state.user.level)} • Level ${state.user.level}</div>
+              <div class="text-xs opacity-90 mt-1">${state.user.kelas || '7A'} • ${state.user.sekolah || 'SMP Arkasila'}</div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs"><span class="opacity-80">XP Progress</span><span class="font-semibold">${state.user.xp} / ${xpForNextLevel(state.user.xp)} XP</span></div>
+            <div class="h-2 bg-white/20 rounded-full overflow-hidden"><div class="h-full bg-white progress-fill" style="width:${getLevelProgress(state.user.xp).percent}%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+        <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2"><i class="fa-solid fa-book text-brand-500"></i><span class="text-xs text-slate-400">Materi</span></div>
+          <div class="text-3xl font-bold">${completedMateri}<span class="text-base text-slate-400">/${totalMateri}</span></div>
+          <div class="mt-2 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-brand-500 progress-fill" style="width:${progressPercent}%"></div></div>
+          <div class="text-xs text-slate-500 mt-1">${progressPercent}% selesai</div>
+        </div>
+        <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2"><i class="fa-solid fa-circle-check text-accent-500"></i><span class="text-xs text-slate-400">Kuis</span></div>
+          <div class="text-3xl font-bold">${state.user.quizScores.length}</div>
+          <div class="text-xs text-slate-500 mt-1">Rata-rata: <span class="font-bold text-accent-600">${avgScore}</span></div>
+        </div>
+        <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2"><i class="fa-solid fa-bolt text-yellow-500"></i><span class="text-xs text-slate-400">XP</span></div>
+          <div class="text-3xl font-bold">${state.user.xp}</div>
+          <div class="text-xs text-slate-500 mt-1">Level ${state.user.level}</div>
+        </div>
+        <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2"><i class="fa-solid fa-gamepad text-purple-500"></i><span class="text-xs text-slate-400">Game</span></div>
+          <div class="text-3xl font-bold">${state.user.gamesWon.length}</div>
+          <div class="text-xs text-slate-500 mt-1">Game dimenangkan</div>
+        </div>
+      </div>
+    </div>
+    
+    ${state.user.catatanGuru ? `
+    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30 rounded-2xl p-5 border border-yellow-200 dark:border-yellow-800/50 mb-6">
+      <h3 class="font-bold mb-2 flex items-center gap-2 text-yellow-800 dark:text-yellow-500"><i class="fa-solid fa-clipboard-user"></i> Catatan dari Guru</h3>
+      <p class="text-sm text-slate-700 dark:text-slate-300 italic">"${state.user.catatanGuru}"</p>
+    </div>
+    ` : ''}
+    
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-100 dark:border-slate-800 mb-6">
+      <h3 class="font-display text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-medal text-yellow-500"></i> Badge Pencapaian</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        ${badgesData.map(b => {
+          const earned = state.user.badges.includes(b.id);
+          return `<div class="text-center p-3 rounded-xl ${earned ? 'bg-gradient-to-br ' + b.color + ' text-white' : 'bg-slate-50 dark:bg-slate-800/50 opacity-60'}">
+            <div class="w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${earned ? 'bg-white/20' : 'bg-slate-200 dark:bg-slate-700'}"><i class="fa-solid ${b.icon} ${earned ? 'text-white' : 'text-slate-400'}"></i></div>
+            <div class="text-xs font-bold ${earned ? '' : 'text-slate-500'}">${b.name}</div><div class="text-[10px] ${earned ? 'opacity-80' : 'text-slate-400'} mt-0.5">${b.desc}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-100 dark:border-slate-800">
+      <h3 class="font-display text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-book-open text-brand-500"></i> Progress Materi</h3>
+      <div class="space-y-3">
+        ${materiData.map((m, i) => {
+          const done = state.user.completedMateri.includes(m.id);
+          return `<div onclick="navigate('materi', {index: ${i}})" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition">
+            <div class="w-10 h-10 rounded-xl ${done ? 'bg-accent-100 dark:bg-accent-900/40' : 'bg-gradient-to-br ' + m.color} flex items-center justify-center text-white flex-shrink-0"><i class="fa-solid ${done ? 'fa-check text-accent-600' : m.icon}"></i></div>
+            <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">${m.title}</div><div class="text-[11px] text-slate-500">${getMateriLabel(i)} • ${m.duration}</div></div>
+            ${done ? '<span class="text-xs text-accent-600 font-semibold">Selesai</span>' : '<i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>'}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function openEditProfileModal() {
+  const u = state.user;
+  const html = `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-xl font-bold">Edit Profil Siswa</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Nama Lengkap</label>
+        <input type="text" id="edit-name" value="${u.name}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none">
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Inisial Avatar (Maks 2 huruf)</label>
+        <input type="text" id="edit-avatar" maxlength="2" value="${u.avatar}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none uppercase">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Kelas</label>
+          <input type="text" id="edit-kelas" value="${u.kelas || '7A'}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Sekolah</label>
+          <input type="text" id="edit-sekolah" value="${u.sekolah || 'SMP Arkasila'}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none">
+        </div>
+      </div>
+      <button onclick="saveProfile()" class="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:shadow-lg transition">Simpan Perubahan</button>
+    </div>
+  `;
+  openModal(html);
+}
+
+function saveProfile() {
+  state.user.name = document.getElementById('edit-name').value || 'Siswa';
+  state.user.avatar = document.getElementById('edit-avatar').value.toUpperCase() || 'S';
+  state.user.kelas = document.getElementById('edit-kelas').value || '-';
+  state.user.sekolah = document.getElementById('edit-sekolah').value || '-';
+  saveState(); 
+  updateHeader();
+  closeModal();
+  showToast('Profil berhasil diperbarui!', 'success', 'fa-check');
+  renderDashboard();
+}
+
+function renderMateri(params) {
+  const idx = params.index !== undefined ? params.index : state.currentMateri || 0;
+  state.currentMateri = idx; saveState();
+  const materi = materiData[idx];
+  const isCompleted = state.user.completedMateri.includes(materi.id);
+  const isLast = idx === materiData.length - 1;
+  const isFirst = idx === 0;
+  
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6">
+      <div class="flex items-center gap-2 text-sm text-slate-500 mb-2"><button onclick="navigate('home')" class="hover:text-brand-600">Beranda</button><i class="fa-solid fa-chevron-right text-[10px]"></i><span>Materi</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="text-brand-600 font-semibold">${getMateriLabel(idx)}</span></div>
+      <h1 class="font-display text-3xl sm:text-4xl font-bold">${materi.title}</h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">${materi.summary}</p>
+    </div>
+    <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar pb-1">
+      ${materiData.map((m, i) => `<button onclick="navigate('materi', {index: ${i}})" class="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition ${i === idx ? 'bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-500/30' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-brand-300'}"><i class="fa-solid ${m.icon} mr-1.5"></i> ${getMateriLabel(i)}</button>`).join('')}
+      <button onclick="navigate('video')" class="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-brand-300"><i class="fa-solid fa-video mr-1.5 text-brand-500"></i> Tonton Video</button>
+    </div>
+    <div class="grid lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-4">
+        <div class="relative rounded-2xl overflow-hidden aspect-video bg-gradient-to-br ${materi.color}">
+          <img src="${materi.image}" alt="${materi.title}" class="w-full h-full object-cover opacity-60">
+          <div class="absolute inset-0 flex items-center justify-center"><i class="fa-solid ${materi.icon} text-7xl text-white/90"></i></div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-7 border border-slate-100 dark:border-slate-800 space-y-4">
+          ${materi.content.map(block => renderContentBlock(block)).join('')}
+        </div>
+        <div class="bg-gradient-to-br from-brand-50 to-accent-50 dark:from-brand-950/40 dark:to-accent-950/40 rounded-2xl p-5 sm:p-6 border border-brand-100 dark:border-brand-900/50">
+          <h3 class="font-display text-xl font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-key text-brand-500"></i> Poin Penting</h3>
+          <div class="space-y-2">${materi.keyPoints.map(point => `<div class="flex items-start gap-2"><i class="fa-solid fa-check-circle text-accent-500 mt-1 flex-shrink-0"></i><span class="text-sm">${point}</span></div>`).join('')}</div>
+        </div>
+        <div class="flex items-center justify-between gap-3 pt-2">
+          <button onclick="navigate('materi', {index: ${idx - 1}})" ${isFirst ? 'disabled' : ''} class="flex items-center gap-2 px-4 py-3 rounded-xl ${isFirst ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-brand-300'} font-semibold transition"><i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">Sebelumnya</span></button>
+          ${!isCompleted ? `<button onclick="completeMateri(${materi.id})" class="px-5 py-3 rounded-xl bg-accent-500 text-white font-semibold hover:bg-accent-600 transition flex items-center gap-2"><i class="fa-solid fa-check"></i> Tandai Selesai</button>` : isLast ? `<button onclick="navigate('sertifikat')" class="px-5 py-3 rounded-xl bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition flex items-center gap-2"><i class="fa-solid fa-award"></i> Ambil Sertifikat</button>` : ''}
+          <button onclick="navigate('materi', {index: ${idx + 1}})" ${isLast ? 'disabled' : ''} class="flex items-center gap-2 px-4 py-3 rounded-xl ${isLast ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed' : 'bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:shadow-lg'} font-semibold transition"><span class="hidden sm:inline">Selanjutnya</span> <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 sticky top-20">
+          <h3 class="font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-list text-brand-500"></i> Daftar Isi</h3>
+          <div class="space-y-1.5">
+            ${materiData.map((m, i) => {
+              const done = state.user.completedMateri.includes(m.id);
+              const active = i === idx;
+              return `<button onclick="navigate('materi', {index: ${i}})" class="w-full text-left flex items-center gap-2.5 p-2.5 rounded-lg transition ${active ? 'bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}">
+                <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold ${done ? 'bg-accent-500 text-white' : active ? 'bg-brand-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}">${done ? '<i class="fa-solid fa-check text-[10px]"></i>' : i + 1}</div>
+                <span class="text-sm flex-1 ${active ? 'font-semibold text-brand-700 dark:text-brand-300' : ''}">${m.title}</span>
+              </button>`;
+            }).join('')}
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex justify-between text-xs mb-2"><span class="text-slate-500">Progress</span><span class="font-bold text-brand-600">${Math.round((state.user.completedMateri.length / materiData.length) * 100)}%</span></div>
+            <div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-500 to-accent-500 progress-fill" style="width:${(state.user.completedMateri.length / materiData.length) * 100}%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderVideo() {
+  const isOnline = navigator.onLine;
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6">
+      <div class="flex items-center gap-2 text-sm text-slate-500 mb-2"><button onclick="navigate('home')" class="hover:text-brand-600">Beranda</button><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="text-brand-600 font-semibold">Video Materi</span></div>
+      <h1 class="font-display text-3xl sm:text-4xl font-bold">Video Pembelajaran 🎬</h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">Tonton video untuk memperdalam pemahaman tentang materi Persatuan dan Kebudayaan Indonesia.</p>
+    </div>
+
+    ${!isOnline ? `
+      <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 rounded-2xl p-6 text-center mb-6">
+        <i class="fa-solid fa-wifi-slash text-4xl text-red-500 mb-3"></i>
+        <h3 class="font-bold text-lg text-red-700 dark:text-red-400">Kamu Sedang Offline</h3>
+        <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Video pembelajaran memerlukan koneksi internet. Sambungkan perangkatmu ke internet untuk menonton video.</p>
+      </div>
+    ` : ''}
+
+    <div class="grid lg:grid-cols-2 gap-6">
+      ${videoData.map((v, i) => {
+        return `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden card-hover flex flex-col">
+            <div class="aspect-video bg-slate-900 flex items-center justify-center relative">
+              ${isOnline ? 
+                (v.type === 'mp4' ? 
+                  `<video class="w-full h-full" controls><source src="${v.url}" type="video/mp4">Browser tidak mendukung tag video.</video>` : 
+                  `<iframe class="w-full h-full absolute top-0 left-0" src="${v.url}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+                ) : 
+                `<div class="text-center text-slate-500 p-4">
+                   <i class="fa-solid fa-video-slash text-4xl text-slate-600 mb-2"></i>
+                   <p class="text-sm font-medium">Video Tidak Tersedia</p>
+                   <p class="text-xs">Membutuhkan koneksi internet</p>
+                 </div>`
+              }
+            </div>
+            <div class="p-5 flex-grow flex flex-col">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white text-sm font-bold">${i + 1}</div>
+                <h3 class="font-bold text-base">${v.title}</h3>
+              </div>
+              <p class="text-xs text-slate-500 mb-3 flex-grow">${v.summary}</p>
+              ${v.hasEvaluation ? `
+                <button onclick="openVideoEvaluation(${v.id})" class="mt-auto w-full px-4 py-2 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white text-sm font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-brain"></i> Kerjakan Evaluasi Kritis
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function openVideoEvaluation(videoId) {
+  const isDone = state.user.videoEvaluationsCompleted.includes(videoId);
+  let questionsHtml = '';
+
+  if (videoId === 1) {
+    questionsHtml = `
+      <div>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-200">1. Mengapa persatuan dan kesatuan sangat penting bagi bangsa Indonesia yang memiliki keberagaman?</label>
+        <textarea id="eval-q1" rows="3" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm" placeholder="Tuliskan jawabanmu di sini..."></textarea>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-200">2. Sebutkan satu contoh tindakan nyata yang dapat kamu lakukan di lingkungan sekolah untuk mempererat persatuan!</label>
+        <textarea id="eval-q2" rows="3" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm" placeholder="Tuliskan jawabanmu di sini..."></textarea>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-200">3. Menurutmu, apa yang akan terjadi jika semangat persatuan dan kesatuan mulai melemah di masyarakat?</label>
+        <textarea id="eval-q3" rows="3" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm" placeholder="Tuliskan jawabanmu di sini..."></textarea>
+      </div>
+    `;
+  } else if (videoId === 2) {
+    questionsHtml = `
+      <div>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-200">1. Berdasarkan video, apa dampak positif utama yang akan kita rasakan jika persatuan dan kesatuan terjaga dengan baik?</label>
+        <textarea id="eval-q1" rows="3" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm" placeholder="Tuliskan jawabanmu di sini..."></textarea>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-200">2. Bagaimana cara menyelesaikan perbedaan pendapat agar tidak merusak persatuan di lingkungan masyarakat?</label>
+        <textarea id="eval-q2" rows="3" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm" placeholder="Tuliskan jawabanmu di sini..."></textarea>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-200">3. Mengapa persatuan menjadi kunci kekuatan bangsa Indonesia dalam menghadapi tantangan global saat ini?</label>
+        <textarea id="eval-q3" rows="3" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm" placeholder="Tuliskan jawabanmu di sini..."></textarea>
+      </div>
+    `;
+  }
+
+  const html = `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-lightbulb text-yellow-500"></i> Evaluasi Kritis</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    ${isDone ? `<div class="bg-accent-50 dark:bg-accent-950/30 text-accent-700 p-3 rounded-xl mb-4 text-sm font-medium"><i class="fa-solid fa-check-circle mr-1"></i> Kamu sudah menyelesaikan evaluasi ini. Kerjakan ulang untuk berlatih!</div>` : ''}
+    <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Jawab pertanyaan berikut berdasarkan video yang telah kamu tonton untuk melatih pemikiran kritismu:</p>
+    <div class="space-y-4">
+      ${questionsHtml}
+      <button onclick="submitVideoEvaluation(${videoId})" class="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-paper-plane"></i> Kirim Jawaban Evaluasi
+      </button>
+    </div>
+  `;
+  openModal(html);
+}
+
+function submitVideoEvaluation(id) {
+  const q1 = document.getElementById('eval-q1').value.trim();
+  const q2 = document.getElementById('eval-q2').value.trim();
+  const q3 = document.getElementById('eval-q3').value.trim();
+  
+  if (q1.length < 10 || q2.length < 10 || q3.length < 10) {
+    showToast("Jawaban kurang detail, coba tulis lebih panjang (min 10 huruf) ya!", "warning", "fa-triangle-exclamation");
+    return;
+  }
+
+  if (!state.user.videoEvaluationsCompleted.includes(id)) {
+    state.user.videoEvaluationsCompleted.push(id);
+    saveState();
+    addXP(30, "Menyelesaikan Evaluasi Kritis");
+  } else {
+    showToast("Bagus! Kamu sudah berlatih lagi, tetap semangat berpikir kritis!", "info", "fa-circle-info");
+  }
+  closeModal();
+}
+
+function renderContentBlock(block) {
+  switch(block.type) {
+    case 'heading': return `<h2 class="font-display text-2xl font-bold mt-4 mb-2 text-slate-900 dark:text-white">${block.text}</h2>`;
+    case 'paragraph': return `<p class="text-slate-700 dark:text-slate-300 leading-relaxed">${block.text}</p>`;
+    case 'highlight': return `<div class="bg-gradient-to-br from-brand-50 to-accent-50 dark:from-brand-950/40 dark:to-accent-950/40 border-l-4 border-brand-500 rounded-r-2xl p-4 my-3"><div class="flex items-start gap-3"><i class="fa-solid ${block.icon || 'fa-lightbulb'} text-brand-500 text-lg mt-0.5"></i><p class="text-slate-700 dark:text-slate-200 font-medium">${block.text}</p></div></div>`;
+    default: return '';
+  }
+}
+
+function completeMateri(id) {
+  if (!state.user.completedMateri.includes(id)) {
+    state.user.completedMateri.push(id); saveState();
+    addXP(50, 'Materi selesai'); completeMission('materi');
+    setTimeout(() => {
+      if (state.currentMateri < materiData.length - 1) navigate('materi', { index: state.currentMateri + 1 });
+      else navigate('sertifikat');
+    }, 1200);
+  }
+}
+
+let quizState = null;
+function renderKuis(params) {
+  if (params.restart || !quizState) initQuiz();
+  if (quizState.finished) { renderQuizResult(); return; }
+  const q = quizState.questions[quizState.currentIndex];
+  const progress = ((quizState.currentIndex) / quizState.questions.length) * 100;
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6"><h1 class="font-display text-3xl font-bold mb-1">Pretest Kuis Interaktif</h1><p class="text-slate-500">Pendidikan Pancasila • Kelas VII • 20 Soal • +10 XP / Jawaban Benar</p></div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 mb-4">
+      <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white"><i class="fa-solid fa-circle-question"></i></div><div><div class="text-xs text-slate-500">Soal ${quizState.currentIndex + 1} dari ${quizState.questions.length}</div><div class="font-bold">${getQuestionTypeLabel(q.type)}</div></div></div>
+        <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-100 dark:bg-brand-900/40 text-brand-600"><i class="fa-regular fa-clock"></i><span class="font-bold tabular-nums" id="quiz-timer">${formatTime(quizState.timeLeft)}</span></div>
+      </div>
+      <div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-500 to-accent-500 progress-fill" style="width:${progress}%"></div></div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-7 border border-slate-100 dark:border-slate-800 mb-4">
+      <h2 class="font-display text-xl sm:text-2xl font-bold leading-snug mb-5">${q.question}</h2>
+      <div id="quiz-answer-area">${renderQuestionInput(q)}</div>
+      <div id="quiz-feedback" class="hidden mt-5"></div>
+    </div>
+    <div class="flex items-center justify-between gap-3">
+      <button onclick="navigate('home')" class="px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-semibold hover:border-red-300 hover:text-red-600 transition flex items-center gap-2"><i class="fa-solid fa-xmark"></i> Keluar</button>
+      <div class="flex items-center gap-2">
+        <button id="quiz-submit-btn" onclick="submitQuizAnswer()" class="px-5 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 transition flex items-center gap-2">Periksa Jawaban <i class="fa-solid fa-arrow-right"></i></button>
+        <button id="quiz-next-btn" onclick="nextQuestion()" class="hidden px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:shadow-lg transition flex items-center gap-2">${quizState.currentIndex === quizState.questions.length - 1 ? 'Lihat Hasil' : 'Soal Berikutnya'} <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+  `;
+  startQuizTimer();
+  setupQuestionHandlers(q);
+}
+
+function getQuestionTypeLabel(type) { return { pg: 'Pilihan Ganda', bs: 'Benar / Salah', isian: 'Isian Singkat', jodohkan: 'Menjodohkan', drag: 'Urutkan (Drag & Drop)' }[type] || type; }
+function renderQuestionInput(q) {
+  switch(q.type) {
+    case 'pg': return `<div class="space-y-2.5">${q.options.map((opt, i) => `<button onclick="selectQuizOption(${i})" data-option="${i}" class="quiz-option w-full text-left p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-sm flex-shrink-0">${String.fromCharCode(65 + i)}</span><span class="text-sm sm:text-base">${opt}</span></button>`).join('')}</div>`;
+    case 'bs': return `<div class="grid grid-cols-2 gap-3"><button onclick="selectQuizOption(true)" data-option="true" class="quiz-option p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-center"><i class="fa-solid fa-check text-3xl text-accent-500 mb-2"></i><div class="font-bold">BENAR</div></button><button onclick="selectQuizOption(false)" data-option="false" class="quiz-option p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-center"><i class="fa-solid fa-xmark text-3xl text-red-500 mb-2"></i><div class="font-bold">SALAH</div></button></div>`;
+    case 'isian': return `<div><input type="text" id="isian-input" placeholder="Ketik jawabanmu di sini..." class="w-full p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none text-base"><p class="text-xs text-slate-500 mt-2"><i class="fa-solid fa-info-circle"></i> Tulis jawaban singkat, abaikan huruf besar/kecil</p></div>`;
+    case 'jodohkan': return `<div class="grid grid-cols-2 gap-4 sm:gap-6"><div class="space-y-2.5"><div class="text-xs font-bold text-slate-500 uppercase mb-2">A</div>${q.pairs.map((p, i) => `<div onclick="selectJodohkanLeft(${i})" data-left="${i}" class="quiz-option p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-sm cursor-pointer">${p.left}</div>`).join('')}</div><div class="space-y-2.5"><div class="text-xs font-bold text-slate-500 uppercase mb-2">B</div>${q.pairs.map((p, i) => `<div onclick="selectJodohkanRight(${i})" data-right="${i}" class="quiz-option p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-sm cursor-pointer">${p.right}</div>`).join('')}</div></div><div id="jodohkan-connections" class="mt-3 text-xs text-slate-500"></div>`;
+    case 'drag': return `<div><div class="text-xs text-slate-500 mb-3"><i class="fa-solid fa-hand-pointer"></i> Seret item untuk mengurutkan dari atas ke bawah</div><div id="drag-list" class="space-y-2">${q.items.map((item) => `<div draggable="true" data-id="${item.id}" class="draggable p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-3 cursor-grab"><i class="fa-solid fa-grip-vertical text-slate-400"></i><span class="text-sm">${item.text}</span></div>`).join('')}</div></div>`;
+    default: return '';
+  }
+}
+function setupQuestionHandlers(q) { if (q.type === 'drag') setupDragHandlers(); }
+let dragSrc = null;
+function setupDragHandlers() {
+  const list = document.getElementById('drag-list'); if (!list) return;
+  list.querySelectorAll('.draggable').forEach(item => {
+    item.addEventListener('dragstart', (e) => { dragSrc = item; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    item.addEventListener('dragend', () => { item.classList.remove('dragging'); });
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault(); const dragging = list.querySelector('.dragging'); if (dragging === item) return;
+      const rect = item.getBoundingClientRect(); const midY = rect.top + rect.height / 2;
+      if (e.clientY < midY) list.insertBefore(dragging, item); else list.insertBefore(dragging, item.nextSibling);
+    });
+  });
+}
+let selectedOption = null;
+let jodohkanState = { left: null, right: null, connections: [] };
+function selectQuizOption(value) { if (quizState.answered) return; selectedOption = value; document.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected')); document.querySelector(`[data-option="${value}"]`)?.classList.add('selected'); }
+function selectJodohkanLeft(idx) { if (quizState.answered || jodohkanState.connections.some(c => c.left === idx)) return; jodohkanState.left = idx; document.querySelectorAll('[data-left]').forEach(el => el.classList.remove('selected')); document.querySelector(`[data-left="${idx}"]`)?.classList.add('selected'); if (jodohkanState.right !== null) addJodohkanConnection(); }
+function selectJodohkanRight(idx) { if (quizState.answered || jodohkanState.connections.some(c => c.right === idx)) return; jodohkanState.right = idx; document.querySelectorAll('[data-right]').forEach(el => el.classList.remove('selected')); document.querySelector(`[data-right="${idx}"]`)?.classList.add('selected'); if (jodohkanState.left !== null) addJodohkanConnection(); }
+function addJodohkanConnection() {
+  jodohkanState.connections.push({ left: jodohkanState.left, right: jodohkanState.right });
+  document.getElementById('jodohkan-connections').innerHTML = jodohkanState.connections.map(c => `<div class="text-xs"><span class="font-semibold text-brand-600">${quizState.questions[quizState.currentIndex].pairs[c.left].left}</span> → <span class="font-semibold text-accent-600">${quizState.questions[quizState.currentIndex].pairs[c.right].right}</span></div>`).join('');
+  document.querySelectorAll('[data-left], [data-right]').forEach(el => el.classList.remove('selected'));
+  jodohkanState.left = null; jodohkanState.right = null;
+}
+function initQuiz() {
+  const shuffled = [...quizQuestions].sort(() => Math.random() - 0.5);
+  shuffled.forEach(q => { if (q.type === 'pg') { const correct = q.options[q.answer]; q.options = q.options.sort(() => Math.random() - 0.5); q.answer = q.options.indexOf(correct); } });
+  // Set waktu menjadi 30 menit (1800 detik) sesuai dokumen pretest
+  quizState = { questions: shuffled, currentIndex: 0, correctCount: 0, answered: false, timeLeft: 1800, finished: false, userAnswers: [] };
+  jodohkanState = { left: null, right: null, connections: [] }; selectedOption = null;
+}
+function startQuizTimer() {
+  if (window.quizTimerInterval) clearInterval(window.quizTimerInterval);
+  window.quizTimerInterval = setInterval(() => {
+    if (!quizState || quizState.finished || quizState.answered) return;
+    quizState.timeLeft--;
+    const timerEl = document.getElementById('quiz-timer');
+    if (timerEl) { timerEl.textContent = formatTime(quizState.timeLeft); if (quizState.timeLeft < 60) { timerEl.parentElement.classList.remove('bg-brand-100', 'dark:bg-brand-900/40', 'text-brand-600'); timerEl.parentElement.classList.add('bg-red-100', 'dark:bg-red-900/40', 'text-red-600'); } }
+    if (quizState.timeLeft <= 0) { clearInterval(window.quizTimerInterval); showToast('Waktu habis!', 'warning', 'fa-clock'); finishQuiz(); }
+  }, 1000);
+}
+function formatTime(seconds) { const m = Math.floor(seconds / 60); const s = seconds % 60; return `${m}:${s.toString().padStart(2, '0')}`; }
+function submitQuizAnswer() {
+  if (quizState.answered) return;
+  const q = quizState.questions[quizState.currentIndex];
+  let isCorrect = false, userAnswer = '';
+  switch(q.type) {
+    case 'pg':
+      if (selectedOption === null) { showToast('Pilih jawaban dulu!', 'warning', 'fa-triangle-exclamation'); return; }
+      isCorrect = selectedOption === q.answer; userAnswer = q.options[selectedOption];
+      document.querySelectorAll('.quiz-option').forEach((el, i) => { el.classList.add('disabled'); if (i === q.answer) el.classList.add('correct'); else if (i === selectedOption && !isCorrect) el.classList.add('wrong'); });
+      break;
+    case 'bs':
+      if (selectedOption === null) { showToast('Pilih jawaban dulu!', 'warning', 'fa-triangle-exclamation'); return; }
+      isCorrect = selectedOption === q.answer; userAnswer = selectedOption ? 'Benar' : 'Salah';
+      document.querySelectorAll('.quiz-option').forEach(el => { el.classList.add('disabled'); const val = el.dataset.option === 'true'; if (val === q.answer) el.classList.add('correct'); else if (val === selectedOption && !isCorrect) el.classList.add('wrong'); });
+      break;
+    case 'isian':
+      const input = document.getElementById('isian-input');
+      if (!input.value.trim()) { showToast('Isi jawaban dulu!', 'warning', 'fa-triangle-exclamation'); return; }
+      userAnswer = input.value.trim();
+      isCorrect = userAnswer.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim() === q.answer.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+      input.classList.add(isCorrect ? 'correct' : 'wrong'); input.classList.add('disabled');
+      break;
+    case 'jodohkan':
+      if (jodohkanState.connections.length < q.pairs.length) { showToast(`Jodohkan semua ${q.pairs.length} pasangan!`, 'warning', 'fa-triangle-exclamation'); return; }
+      isCorrect = jodohkanState.connections.every(c => q.pairs[c.left].right === q.pairs[c.right].right);
+      userAnswer = jodohkanState.connections.map(c => `${q.pairs[c.left].left}→${q.pairs[c.right].right}`).join(', ');
+      jodohkanState.connections.forEach(c => { const correct = q.pairs[c.left].right === q.pairs[c.right].right; document.querySelector(`[data-left="${c.left}"]`)?.classList.add(correct ? 'correct' : 'wrong'); document.querySelector(`[data-right="${c.right}"]`)?.classList.add(correct ? 'correct' : 'wrong'); });
+      document.querySelectorAll('[data-left], [data-right]').forEach(el => el.classList.add('disabled'));
+      break;
+    case 'drag':
+      const items = document.querySelectorAll('#drag-list .draggable');
+      const userOrder = Array.from(items).map(el => el.dataset.id);
+      isCorrect = JSON.stringify(userOrder) === JSON.stringify(q.correctOrder);
+      userAnswer = userOrder.join(' → ');
+      items.forEach(el => el.classList.add('disabled'));
+      break;
+  }
+  quizState.answered = true;
+  if (isCorrect) {
+    quizState.correctCount++;
+    addXP(10, 'Jawaban benar'); // Memberikan 10 XP langsung saat menjawab benar
+  }
+  quizState.userAnswers.push({ question: q.question, userAnswer, correct: isCorrect });
+  document.getElementById('quiz-feedback').classList.remove('hidden');
+  document.getElementById('quiz-feedback').innerHTML = `<div class="rounded-xl p-4 ${isCorrect ? 'bg-accent-50 dark:bg-accent-950/30 border-accent-200' : 'bg-red-50 dark:bg-red-950/30 border-red-200'} border"><div class="flex items-start gap-3"><div class="w-10 h-10 rounded-xl ${isCorrect ? 'bg-accent-500' : 'bg-red-500'} flex items-center justify-center text-white flex-shrink-0"><i class="fa-solid ${isCorrect ? 'fa-check' : 'fa-xmark'}"></i></div><div class="flex-1"><div class="font-bold ${isCorrect ? 'text-accent-700' : 'text-red-700'} mb-1">${isCorrect ? 'Jawaban Benar! 🎉' : 'Belum Tepat'}</div><div class="text-sm text-slate-700 dark:text-slate-300"><strong>Pembahasan:</strong> ${q.explanation}</div></div></div></div>`;
+  document.getElementById('quiz-submit-btn').classList.add('hidden');
+  document.getElementById('quiz-next-btn').classList.remove('hidden');
+}
+function nextQuestion() {
+  if (quizState.currentIndex === quizState.questions.length - 1) { finishQuiz(); return; }
+  quizState.currentIndex++; quizState.answered = false; selectedOption = null; jodohkanState = { left: null, right: null, connections: [] };
+  renderKuis({});
+}
+function finishQuiz() {
+  if (window.quizTimerInterval) clearInterval(window.quizTimerInterval);
+  quizState.finished = true;
+  const total = quizState.questions.length, correct = quizState.correctCount, score = Math.round((correct / total) * 100);
+  state.user.quizScores.push({ date: Date.now(), score, correct, total }); saveState();
+  addXP(Math.round(score / 2) + 10, 'Bonus Kuis selesai'); // Bonus XP di akhir kuis
+  completeMission('kuis');
+  if (score === 100) setTimeout(() => launchConfetti(), 500);
+  renderQuizResult();
+}
+function renderQuizResult() {
+  const total = quizState.questions.length, correct = quizState.correctCount, score = Math.round((correct / total) * 100), passed = score >= 70;
+  document.getElementById('view-container').innerHTML = `
+    <div class="max-w-2xl mx-auto">
+      <div class="text-center mb-6">
+        <div class="w-24 h-24 rounded-full ${score >= 80 ? 'bg-gradient-to-br from-accent-400 to-accent-600' : score >= 60 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' : 'bg-gradient-to-br from-red-400 to-red-600'} flex items-center justify-center text-white text-4xl shadow-xl mx-auto mb-4 badge-pop"><i class="fa-solid ${score >= 80 ? 'fa-trophy' : score >= 60 ? 'fa-medal' : 'fa-face-frown'}"></i></div>
+        <h1 class="font-display text-3xl font-bold mb-1">${passed ? 'Selamat! 🎉' : 'Tetap Semangat! 💪'}</h1>
+        <p class="text-slate-500">${passed ? 'Kamu lulus kuis ini!' : 'Coba lagi untuk hasil lebih baik!'}</p>
+      </div>
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 mb-4">
+        <div class="grid grid-cols-3 gap-4 text-center mb-6">
+          <div><div class="text-3xl font-bold text-brand-600">${score}</div><div class="text-xs text-slate-500">Nilai</div></div>
+          <div><div class="text-3xl font-bold text-accent-600">${correct}/${total}</div><div class="text-xs text-slate-500">Benar</div></div>
+          <div><div class="text-3xl font-bold text-yellow-600">+${Math.round(score / 2) + 10}</div><div class="text-xs text-slate-500">Bonus XP</div></div>
+        </div>
+        <div class="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2"><div class="h-full ${passed ? 'bg-gradient-to-r from-accent-500 to-accent-600' : 'bg-gradient-to-r from-yellow-500 to-orange-500'} progress-fill" style="width:${score}%"></div></div>
+        <div class="text-center text-sm text-slate-500">Skor kamu: ${score}%</div>
+      </div>
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 mb-4">
+        <h3 class="font-bold mb-3">Review Jawaban</h3>
+        <div class="space-y-3 max-h-80 overflow-y-auto">
+          ${quizState.userAnswers.map((a, i) => `<div class="p-3 rounded-xl ${a.correct ? 'bg-accent-50 dark:bg-accent-950/20' : 'bg-red-50 dark:bg-red-950/20'}"><div class="flex items-start gap-2"><div class="w-6 h-6 rounded-full ${a.correct ? 'bg-accent-500' : 'bg-red-500'} flex items-center justify-center text-white text-xs flex-shrink-0 mt-0.5"><i class="fa-solid ${a.correct ? 'fa-check' : 'fa-xmark'} text-[10px]"></i></div><div class="flex-1 min-w-0"><div class="text-xs text-slate-500 mb-1">Soal ${i + 1}</div><div class="text-sm font-medium mb-1">${a.question}</div><div class="text-xs"><span class="text-slate-500">Jawabanmu:</span> <span class="${a.correct ? 'text-accent-700' : 'text-red-700'} font-medium">${a.userAnswer || '(kosong)'}</span></div></div></div></div>`).join('')}
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="initQuiz(); renderKuis({restart: true})" class="flex-1 px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-semibold hover:border-brand-300 transition flex items-center justify-center gap-2"><i class="fa-solid fa-rotate"></i> Coba Lagi</button>
+        <button onclick="navigate('dashboard')" class="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:shadow-lg transition flex items-center justify-center gap-2"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderGame() {
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6"><h1 class="font-display text-3xl font-bold mb-1">Game Edukasi 🎮</h1><p class="text-slate-500">Belajar sambil bermain, kumpulkan XP!</p></div>
+    <div class="grid sm:grid-cols-3 gap-4 mb-6">
+      <button onclick="startGame('memory')" class="card-hover text-left bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white relative overflow-hidden group"><div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="relative"><div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-clone text-2xl"></i></div><h3 class="font-display text-xl font-bold mb-1">Memory Card</h3><p class="text-sm text-white/80 mb-3">Cocokkan pasangan kartu</p><span class="bg-white/20 px-2 py-1 rounded-lg text-xs">+30 XP</span></div></button>
+      <button onclick="startGame('tebak')" class="card-hover text-left bg-gradient-to-br from-brand-500 to-accent-500 rounded-2xl p-6 text-white relative overflow-hidden group"><div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="relative"><div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-image text-2xl"></i></div><h3 class="font-display text-xl font-bold mb-1">Tebak Gambar</h3><p class="text-sm text-white/80 mb-3">Tebak simbol budaya</p><span class="bg-white/20 px-2 py-1 rounded-lg text-xs">+40 XP</span></div></button>
+      <button onclick="startGame('roda')" class="card-hover text-left bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-6 text-white relative overflow-hidden group"><div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="relative"><div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-circle-dot text-2xl"></i></div><h3 class="font-display text-xl font-bold mb-1">Roda Keberuntungan</h3><p class="text-sm text-white/80 mb-3">Putar roda and jawab</p><span class="bg-white/20 px-2 py-1 rounded-lg text-xs">+50 XP</span></div></button>
+    </div>
+    <div id="game-area" class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-100 dark:border-slate-800 min-h-[400px]"><div class="text-center py-12"><div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-500 to-accent-500 mx-auto mb-4 flex items-center justify-center text-white text-3xl"><i class="fa-solid fa-gamepad"></i></div><h3 class="font-display text-2xl font-bold mb-1">Pilih Game untuk Mulai</h3><p class="text-slate-500">Klik salah satu game di atas dan menangkan XP!</p></div></div>
+  `;
+}
+let memoryGameState = null;
+function startGame(type) { if (type === 'memory') startMemoryGame(); else if (type === 'tebak') startTebakGame(); else if (type === 'roda') startRodaGame(); completeMission('game'); }
+function startMemoryGame() {
+  const pairs = [{ emoji: '🇮🇩', name: 'Bendera' }, { emoji: '🦅', name: 'Garuda' }, { emoji: '🏛️', name: 'Monumen' }, { emoji: '🗺️', name: 'Peta' }, { emoji: '🛕', name: 'Candi' }, { emoji: '🤝', name: 'Persatuan' }];
+  const cards = [...pairs, ...pairs].sort(() => Math.random() - 0.5);
+  memoryGameState = { cards, flipped: [], matched: [], moves: 0, startTime: Date.now() };
+  document.getElementById('game-area').innerHTML = `
+    <div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl font-bold">Memory Card</h3><div class="flex items-center gap-3 text-sm"><div class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800"><span class="text-slate-500">Gerakan:</span> <span class="font-bold" id="memory-moves">0</span></div><div class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800"><span class="text-slate-500">Cocok:</span> <span class="font-bold"><span id="memory-matched">0</span>/6</span></div></div></div>
+    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-w-lg mx-auto">
+      ${cards.map((card, i) => `<div class="memory-card aspect-square" onclick="flipMemoryCard(${i})" data-index="${i}"><div class="memory-card-inner"><div class="memory-card-front bg-gradient-to-br from-brand-500 to-accent-500 text-white"><i class="fa-solid fa-question text-2xl"></i></div><div class="memory-card-back bg-white dark:bg-slate-800 border-2 border-brand-200 dark:border-brand-800"><div class="text-3xl">${card.emoji}</div><div class="text-[10px] text-slate-600 dark:text-slate-300 mt-1 font-semibold">${card.name}</div></div></div></div>`).join('')}
+    </div>
+    <div id="memory-result" class="mt-4 text-center hidden"></div>
+  `;
+}
+function flipMemoryCard(idx) {
+  if (!memoryGameState || memoryGameState.flipped.includes(idx) || memoryGameState.matched.includes(idx) || memoryGameState.flipped.length >= 2) return;
+  document.querySelector(`[data-index="${idx}"]`).classList.add('flipped');
+  memoryGameState.flipped.push(idx);
+  if (memoryGameState.flipped.length === 2) {
+    memoryGameState.moves++; document.getElementById('memory-moves').textContent = memoryGameState.moves;
+    const [a, b] = memoryGameState.flipped;
+    if (memoryGameState.cards[a].emoji === memoryGameState.cards[b].emoji) {
+      setTimeout(() => {
+        document.querySelector(`[data-index="${a}"]`).classList.add('matched');
+        document.querySelector(`[data-index="${b}"]`).classList.add('matched');
+        memoryGameState.matched.push(a, b); memoryGameState.flipped = [];
+        document.getElementById('memory-matched').textContent = memoryGameState.matched.length / 2;
+        if (memoryGameState.matched.length === memoryGameState.cards.length) {
+          if (!state.user.gamesWon.includes('memory')) { state.user.gamesWon.push('memory'); saveState(); }
+          addXP(30, 'Menang Memory Game');
+          document.getElementById('memory-result').classList.remove('hidden');
+          document.getElementById('memory-result').innerHTML = `<div class="bg-gradient-to-br from-accent-50 to-brand-50 dark:from-accent-950/30 dark:to-brand-950/30 rounded-xl p-5 border border-accent-200"><div class="text-4xl mb-2">🎉</div><h4 class="font-bold text-lg mb-1">Selamat! Kamu Menang!</h4><p class="text-sm text-slate-600">Selesai dalam ${memoryGameState.moves} gerakan</p><p class="text-sm text-accent-600 font-semibold mt-1">+30 XP earned!</p><div class="flex gap-2 justify-center mt-3"><button onclick="startMemoryGame()" class="px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold">Main Lagi</button><button onclick="renderGame()" class="px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 text-sm font-semibold">Game Lain</button></div></div>`;
+          launchConfetti();
+        }
+      }, 500);
+    } else {
+      setTimeout(() => { document.querySelector(`[data-index="${a}"]`).classList.remove('flipped'); document.querySelector(`[data-index="${b}"]`).classList.remove('flipped'); memoryGameState.flipped = []; }, 1000);
+    }
+  }
+}
+let tebakGameState = null;
+function startTebakGame() {
+  const items = [{ emoji: '🇮🇩', name: 'Bendera Indonesia', hint: 'Merah Putih' }, { emoji: '🦅', name: 'Garuda Pancasila', hint: 'Lambang negara' }, { emoji: '🏛️', name: 'Monas', hint: 'Monumen Nasional' }, { emoji: '🛕', name: 'Candi Borobudur', hint: 'Candi Buddha terbesar' }, { emoji: '🤝', name: 'Persatuan', hint: 'Bersatu' }];
+  tebakGameState = { items: items.sort(() => Math.random() - 0.5).slice(0, 5), currentIndex: 0, score: 0, answered: false };
+  renderTebakQuestion();
+}
+function renderTebakQuestion() {
+  if (tebakGameState.currentIndex >= tebakGameState.items.length) {
+    if (tebakGameState.score >= 4 && !state.user.gamesWon.includes('tebak')) { state.user.gamesWon.push('tebak'); saveState(); }
+    addXP(tebakGameState.score * 8 + 10, 'Game Tebak Gambar');
+    document.getElementById('game-area').innerHTML = `<div class="text-center py-8"><div class="text-5xl mb-3">${tebakGameState.score >= 4 ? '🏆' : '🎮'}</div><h3 class="font-display text-2xl font-bold mb-1">Game Selesai!</h3><p class="text-slate-500 mb-1">Skor: ${tebakGameState.score}/${tebakGameState.items.length}</p><p class="text-accent-600 font-semibold mb-4">+${tebakGameState.score * 8 + 10} XP earned!</p><div class="flex gap-2 justify-center"><button onclick="startTebakGame()" class="px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold">Main Lagi</button><button onclick="renderGame()" class="px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 text-sm font-semibold">Game Lain</button></div></div>`;
+    if (tebakGameState.score >= 4) launchConfetti();
+    return;
+  }
+  const item = tebakGameState.items[tebakGameState.currentIndex];
+  const options = [item.name];
+  const allNames = ['Bendera Indonesia', 'Garuda Pancasila', 'Monas', 'Candi Borobudur', 'Peta Indonesia', 'Persatuan', 'Wayang', 'Sumpah Pemuda', 'Bhinneka Tunggal Ika', 'Mpu Tantular'];
+  while (options.length < 4) { const random = allNames[Math.floor(Math.random() * allNames.length)]; if (!options.includes(random)) options.push(random); }
+  options.sort(() => Math.random() - 0.5);
+  document.getElementById('game-area').innerHTML = `
+    <div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl font-bold">Tebak Gambar</h3><div class="text-sm px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800"><span class="text-slate-500">Soal:</span> <span class="font-bold">${tebakGameState.currentIndex + 1}/${tebakGameState.items.length}</span> • <span class="text-slate-500">Skor:</span> <span class="font-bold text-accent-600">${tebakGameState.score}</span></div></div>
+    <div class="text-center mb-6"><div class="inline-block p-8 bg-gradient-to-br from-brand-50 to-accent-50 dark:from-brand-950/40 dark:to-accent-950/40 rounded-3xl mb-3"><div class="text-7xl">${item.emoji}</div></div><div class="text-sm text-slate-500"><i class="fa-solid fa-lightbulb"></i> Hint: ${item.hint}</div></div>
+    <div class="grid sm:grid-cols-2 gap-2.5" id="tebak-options">${options.map(opt => `<button onclick="answerTebak('${opt.replace(/'/g, "\\'")}', '${item.name.replace(/'/g, "\\'")}')" class="quiz-option p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-left hover:border-brand-300 transition"><span class="text-sm font-medium">${opt}</span></button>`).join('')}</div>
+  `;
+}
+function answerTebak(answer, correct) {
+  if (tebakGameState.answered) return;
+  tebakGameState.answered = true;
+  if (answer === correct) tebakGameState.score++;
+  document.querySelectorAll('#tebak-options .quiz-option').forEach(btn => { btn.classList.add('disabled'); if (btn.textContent.includes(correct)) btn.classList.add('correct'); else if (btn.textContent.includes(answer)) btn.classList.add('wrong'); });
+  setTimeout(() => { tebakGameState.currentIndex++; tebakGameState.answered = false; renderTebakQuestion(); }, 1200);
+}
+let rodaGameState = null;
+function startRodaGame() { rodaGameState = { spinning: false, score: 0, questions: [{ q: 'Apa arti Bhinneka Tunggal Ika?', a: 'Berbeda-beda tetapi tetap satu' }, { q: 'Kapan Sumpah Pemuda diikrarkan?', a: '28 Oktober 1928' }, { q: 'Siapa pencipta Indonesia Raya?', a: 'WR Supratman' }, { q: 'Bhinneka Tunggal Ika dari kitab apa?', a: 'Sutasoma' }], currentQ: null, answered: false }; renderRodaGame(); }
+function renderRodaGame() {
+  const segments = 8, colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+  document.getElementById('game-area').innerHTML = `
+    <div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl font-bold">Roda Keberuntungan</h3><div class="text-sm px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800"><span class="text-slate-500">Skor:</span> <span class="font-bold text-accent-600">${rodaGameState.score}</span></div></div>
+    <div class="text-center">
+      <div class="relative inline-block mb-4">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10"><div class="w-0 h-0 border-l-8 border-r-8 border-t-[16px] border-l-transparent border-r-transparent border-t-slate-900 dark:border-white"></div></div>
+        <svg id="wheel-svg" class="wheel w-64 h-64 sm:w-72 sm:h-72" viewBox="0 0 200 200">
+          ${Array.from({length: segments}).map((_, i) => { const angle = (360 / segments) * i; const nextAngle = (360 / segments) * (i + 1); const startRad = (angle - 90) * Math.PI / 180; const endRad = (nextAngle - 90) * Math.PI / 180; const x1 = 100 + 90 * Math.cos(startRad); const y1 = 100 + 90 * Math.sin(startRad); const x2 = 100 + 90 * Math.cos(endRad); const y2 = 100 + 90 * Math.sin(endRad); const midRad = ((angle + nextAngle) / 2 - 90) * Math.PI / 180; const textX = 100 + 55 * Math.cos(midRad); const textY = 100 + 55 * Math.sin(midRad); return `<path d="M 100,100 L ${x1},${y1} A 90,90 0 0 1 ${x2},${y2} Z" fill="${colors[i]}" stroke="white" stroke-width="2"/><text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="14" font-weight="bold" transform="rotate(${(angle + nextAngle) / 2} ${textX} ${textY})">${i + 1}</text>`; }).join('')}
+          <circle cx="100" cy="100" r="15" fill="white" stroke="#cbd5e1" stroke-width="2"/>
+        </svg>
+      </div>
+      <div id="roda-action"><button onclick="spinRoda()" id="spin-btn" class="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold hover:shadow-lg transition"><i class="fa-solid fa-rotate"></i> Putar Roda</button></div>
+      <div id="roda-question" class="mt-4 hidden"></div>
+    </div>
+  `;
+}
+function spinRoda() {
+  if (rodaGameState.spinning) return;
+  rodaGameState.spinning = true;
+  document.getElementById('spin-btn').disabled = true;
+  const spinAngle = 360 * 5 + Math.floor(Math.random() * 360);
+  document.getElementById('wheel-svg').style.transform = `rotate(${spinAngle}deg)`;
+  setTimeout(() => {
+    rodaGameState.spinning = false;
+    rodaGameState.currentQ = rodaGameState.questions[Math.floor(Math.random() * rodaGameState.questions.length)];
+    rodaGameState.answered = false;
+    document.getElementById('roda-action').innerHTML = `<div class="text-sm text-slate-500 mb-2">Roda berhenti! Jawab pertanyaan:</div>`;
+    const qEl = document.getElementById('roda-question');
+    qEl.classList.remove('hidden');
+    qEl.innerHTML = `<div class="bg-gradient-to-br from-brand-50 to-accent-50 dark:from-brand-950/40 dark:to-accent-950/40 rounded-2xl p-5 border border-brand-200"><div class="text-xs text-brand-600 font-bold uppercase mb-2">Pertanyaan Roda</div><h4 class="font-bold text-lg mb-3">${rodaGameState.currentQ.q}</h4><input type="text" id="roda-answer-input" placeholder="Ketik jawabanmu..." class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none mb-3"><button onclick="submitRodaAnswer()" class="w-full px-4 py-2.5 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 transition">Kirim Jawaban</button></div>`;
+  }, 5200);
+}
+function submitRodaAnswer() {
+  if (rodaGameState.answered) return;
+  rodaGameState.answered = true;
+  const input = document.getElementById('roda-answer-input');
+  const userAnswer = input.value.trim().toLowerCase();
+  const correctAnswer = rodaGameState.currentQ.a.toLowerCase();
+  const isCorrect = userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer) || (userAnswer.length > 3 && correctAnswer.split(' ').some(w => w.length > 3 && userAnswer.includes(w)));
+  if (isCorrect) { rodaGameState.score += 10; addXP(10, 'Jawab roda benar'); showToast('Jawaban benar! +10 poin', 'success', 'fa-check'); }
+  else showToast(`Jawaban: ${rodaGameState.currentQ.a}`, 'warning', 'fa-info');
+  document.getElementById('roda-question').innerHTML = `<div class="text-center py-4"><div class="text-4xl mb-2">${isCorrect ? '✅' : '❌'}</div><p class="font-bold mb-1">${isCorrect ? 'Benar! +10 poin' : 'Belum tepat'}</p><p class="text-sm text-slate-500 mb-3">Jawaban: ${rodaGameState.currentQ.a}</p><div class="flex gap-2 justify-center"><button onclick="renderRodaGame()" class="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-semibold">Putar Lagi</button><button onclick="renderGame()" class="px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 text-sm font-semibold">Game Lain</button></div></div>`;
+}
+
+function renderLeaderboard() {
+  const allStudents = [...state.students];
+  allStudents.sort((a, b) => b.xp - a.xp);
+  const userRank = allStudents.findIndex(s => s.isCurrentUser) + 1;
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6"><h1 class="font-display text-3xl font-bold mb-1">Papan Skor 🏆</h1><p class="text-slate-500">Siswa berprestasi tertinggi</p></div>
+    <div class="bg-gradient-to-r from-brand-500 to-accent-500 rounded-2xl p-5 text-white mb-6 relative overflow-hidden"><div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10"></div><div class="relative flex items-center justify-between gap-3"><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-xl font-bold">${state.user.avatar}</div><div><div class="text-xs opacity-80">Peringkatmu</div><div class="font-bold text-xl">#${userRank} dari ${allStudents.length}</div></div></div><div class="text-right"><div class="text-xs opacity-80">XP kamu</div><div class="font-bold text-xl">${state.user.xp}</div></div></div></div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+      <div class="p-4 border-b border-slate-100 dark:border-slate-800"><h3 class="font-bold">Peringkat Lengkap</h3></div>
+      <div class="divide-y divide-slate-100 dark:divide-slate-800">
+        ${allStudents.map((s, i) => `<div class="flex items-center gap-3 p-3 sm:p-4 ${s.isCurrentUser ? 'bg-brand-50 dark:bg-brand-950/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'} transition"><div class="w-8 text-center font-bold text-slate-400">${i + 1}</div><div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">${s.avatar}</div><div class="flex-1 min-w-0"><div class="font-semibold text-sm truncate ${s.isCurrentUser ? 'text-brand-700 dark:text-brand-300' : ''}">${s.name} ${s.isCurrentUser ? '(Kamu)' : ''}</div><div class="text-xs text-slate-500">Level ${s.level} • ${s.city || 'Indonesia'}</div></div><div class="text-right"><div class="font-bold text-sm">${s.xp}</div><div class="text-[10px] text-slate-500">XP</div></div><i class="fa-solid ${s.badge || 'fa-star'} ${s.badgeColor || 'text-brand-500'} text-sm"></i></div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderSertifikat() {
+  // Mengambil jawaban benar terbanyak dari riwayat nilai kuis
+  const maxCorrect = state.user.quizScores.length > 0 ? Math.max(...state.user.quizScores.map(q => q.correct)) : 0;
+  const quizPassed = maxCorrect >= 15; // Syarat minimal 15 soal benar
+  const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6"><h1 class="font-display text-3xl font-bold mb-1">Sertifikat Penghargaan 🎓</h1><p class="text-slate-500">Bukti penyelesaian pembelajaran</p></div>
+    ${quizPassed ? `
+      <div id="certificate-print" class="bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-yellow-400 max-w-4xl mx-auto">
+        <div class="bg-gradient-to-br from-brand-600 via-brand-700 to-accent-700 p-6 text-white relative overflow-hidden"><div class="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 -translate-y-20 translate-x-20"></div><div class="relative flex items-center justify-between flex-wrap gap-4"><div class="flex items-center gap-3"><div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center"><i class="fa-solid fa-graduation-cap text-2xl"></i></div><div><div class="font-display font-bold text-2xl">Arkasila</div><div class="text-xs opacity-80">Media Pembelajaran Interaktif SMP</div></div></div><div class="text-right"><div class="text-xs opacity-80">No. Sertifikat</div><div class="font-mono font-bold">AKS-${Date.now().toString().slice(-8)}</div></div></div></div>
+        <div class="p-8 sm:p-12 text-center relative">
+          <div class="absolute top-4 left-4 w-12 h-12 border-l-4 border-t-4 border-brand-500 rounded-tl-xl"></div><div class="absolute top-4 right-4 w-12 h-12 border-r-4 border-t-4 border-brand-500 rounded-tr-xl"></div><div class="absolute bottom-4 left-4 w-12 h-12 border-l-4 border-b-4 border-accent-500 rounded-bl-xl"></div><div class="absolute bottom-4 right-4 w=12 h-12 border-r-4 border-b-4 border-accent-500 rounded-br-xl"></div>
+          <div class="mb-6"><div class="inline-block px-6 py-2 rounded-full bg-gradient-to-r from-brand-100 to-accent-100 text-brand-700 text-sm font-bold uppercase tracking-widest mb-4">Sertifikat Penghargaan</div><h2 class="font-display text-3xl sm:text-4xl font-bold text-slate-900 mb-2">Diberikan Kepada</h2><div class="font-display text-4xl sm:text-5xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent my-4 pb-2 border-b-2 border-dashed border-slate-300 inline-block min-w-[300px]">${state.user.name}</div><p class="text-slate-600 max-w-2xl mx-auto leading-relaxed">Atas keberhasilan menjawab <strong>${maxCorrect} soal dengan benar</strong> pada kuis pembelajaran <strong>Persatuan dan Kebudayaan Indonesia</strong> dan telah memenuhi syarat minimal 15 jawaban benar.</p></div>
+          <div class="grid grid-cols-3 gap-4 max-w-md mx-auto my-6"><div class="text-center"><div class="text-2xl font-bold text-brand-600">${maxCorrect}/20</div><div class="text-xs text-slate-500">Jawaban Benar</div></div><div class="text-center"><div class="text-2xl font-bold text-accent-600">${state.user.xp}</div><div class="text-xs text-slate-500">XP</div></div><div class="text-center"><div class="text-2xl font-bold text-yellow-600">Lvl ${state.user.level}</div><div class="text-xs text-slate-500">Level</div></div></div>
+          <div class="flex items-end justify-between flex-wrap gap-6 mt-8 max-w-2xl mx-auto"><div class="text-center"><div class="font-display italic text-lg mb-1">${today}</div><div class="border-t-2 border-slate-300 pt-1 text-xs text-slate-500 w-40">Tanggal Penerbitan</div></div><div class="text-center"><div class="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 mx-auto mb-1 flex items-center justify-center text-white"><i class="fa-solid fa-award text-3xl"></i></div><div class="font-display font-bold text-lg bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Arkasila</div></div><div class="text-center"><div class="font-display italic text-lg mb-1">Tim Pendidikan</div><div class="border-t-2 border-slate-300 pt-1 text-xs text-slate-500 w-40">Tanda Tangan</div></div></div>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row justify-center gap-3 mt-6 no-print">
+        <button onclick="window.print()" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:shadow-lg transition flex items-center gap-2 justify-center"><i class="fa-solid fa-print"></i> Cetak Langsung</button>
+        <button onclick="downloadCertificate()" class="px-5 py-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 text-white font-semibold hover:shadow-lg transition flex items-center gap-2 justify-center"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+      </div>
+    ` : `
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-100 dark:border-slate-800 text-center max-w-2xl mx-auto">
+        <div class="w-20 h-20 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-lock text-3xl text-yellow-500"></i></div>
+        <h2 class="font-display text-2xl font-bold mb-2">Sertifikat Belum Tersedia</h2>
+        <p class="text-slate-500 mb-4">Jawab minimal 15 soal dengan benar di kuis untuk mendapatkan sertifikat!</p>
+        <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-4"><div class="flex justify-between text-sm mb-2"><span class="text-slate-500">Rekor jawaban benar</span><span class="font-bold">${maxCorrect}/20</span></div><div class="h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-500 to-accent-500 progress-fill" style="width:${Math.min((maxCorrect / 15) * 100, 100)}%"></div></div><div class="text-xs text-slate-400 mt-2 text-left">Target: 15 soal benar</div></div>
+        <button onclick="navigate('kuis')" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:shadow-lg transition"><i class="fa-solid fa-circle-question mr-2"></i> Kerjakan Kuis</button>
+      </div>
+    `}
+  `;
+}
+
+function downloadCertificate() {
+  showToast("Menyiapkan sertifikat PDF, mohon tunggu...", "info", "fa-spinner fa-spin");
+  const element = document.getElementById('certificate-print');
+  
+  html2canvas(element, { 
+    scale: 2, 
+    useCORS: true, 
+    backgroundColor: '#ffffff',
+    logging: false
+  }).then((canvas) => {
+    const { jsPDF } = window.jspdf;
+    const imgData = canvas.toDataURL('image/png');
+    
+    // Ukuran A4 Landscape
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    let heightLeft = imgHeight;
+    let position = 0;
+    
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pdfHeight;
+    
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+    }
+    
+    pdf.save(`Sertifikat-Arkasila-${state.user.name.replace(/\s+/g, '_')}.pdf`);
+    showToast("Sertifikat berhasil diunduh!", "success", "fa-check");
+  }).catch((err) => {
+    console.error("Error generating PDF:", err);
+    showToast("Gagal mengunduh PDF. Menggunakan alternatif cetak...", "error", "fa-xmark");
+    window.print(); // Fallback ke print dialog
+  });
+}
+
+const aiKnowledge = [
+  { keywords: ['budaya', 'kebudayaan', 'buddhayah'], response: 'Kebudayaan berasal dari bahasa Sanskerta "buddhayah" (budi/akal). Ada 7 unsur universal menurut Clyde Kluckhohn, dan 3 wujudnya: Gagasan, Aktivitas, Artefak.' },
+  { keywords: ['perubahan', 'evolusi', 'revolusi', 'cultural lag'], response: 'Perubahan budaya bisa evolusi (lambat) atau revolusi (cepat). Dampak negatifnya salah satunya cultural lag (ketertinggalan budaya).' },
+  { keywords: ['kearifan lokal', 'local wisdom', 'local genius'], response: 'Kearifan lokal (local wisdom) adalah kebijakan setempat yang dipakai turun-temurun untuk mengelola lingkungan dan memadukan budaya luar dengan asli.' },
+  { keywords: ['barang budaya', 'jasa budaya', 'cultural goods'], response: 'Produk budaya meliputi Barang Budaya (bangunan warisan, karya seni) dan Jasa Budaya (pertunjukan, pariwisata budaya).' },
+  { keywords: ['menanggapi', 'pancasila', 'radikalisme', 'hedonisme', 'pemberdayaan'], response: 'Untuk menanggapi perubahan budaya, kita pakai Pancasila sebagai filter untuk menolak radikalisme & hedonisme. Pemberdayaan masyarakat meliputi enabling, empowering, dan protecting.' }
+];
+const aiGreeting = "Halo! Saya ArkaAI. Tanyakan apa saja tentang Pancasila, Kebudayaan, dan Kearifan Lokal Indonesia!";
+const aiFallback = "Maaf, saya belum paham. Coba tanya tentang: Kebudayaan, Perubahan Sosial, Kearifan Lokal, atau Pancasila.";
+
+let chatHistory = [];
+function renderAI() {
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6"><h1 class="font-display text-3xl font-bold mb-1">ArkaAI Tutor 🤖</h1><p class="text-slate-500">Tutor virtual cerdas untuk membantumu belajar</p></div>
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col" style="height:600px">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-gradient-to-r from-brand-50 to-accent-50 dark:from-brand-950/30 dark:to-accent-950/30">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white"><i class="fa-solid fa-robot"></i></div>
+          <div class="flex-1"><div class="font-bold">ArkaAI</div><div class="text-xs text-accent-600 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></span> Online</div></div>
+          <button onclick="clearChat()" class="text-sm text-slate-500 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></button>
+        </div>
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-950/50">
+          ${chatHistory.length === 0 ? `
+            <div class="chat-bubble flex gap-2"><div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white flex-shrink-0"><i class="fa-solid fa-robot text-sm"></i></div><div class="bg-white dark:bg-slate-800 rounded-2xl rounded-tl-sm p-3 max-w-[80%] shadow-sm"><p class="text-sm">${aiGreeting}</p></div></div>
+            <div class="chat-bubble flex gap-2 flex-wrap mt-3">${['Apa itu kebudayaan?', 'Jelaskan kearifan lokal', 'Apa dampak perubahan budaya?'].map(q => `<button onclick="askQuickQuestion('${q}')" class="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-300 hover:text-brand-600 transition">${q}</button>`).join('')}</div>
+          ` : chatHistory.map(m => renderChatMessage(m)).join('')}
+        </div>
+        <div class="p-3 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <div class="flex items-end gap-2">
+            <textarea id="chat-input" rows="1" placeholder="Tulis pertanyaanmu..." class="flex-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendChatMessage()}"></textarea>
+            <button onclick="sendChatMessage()" class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white flex items-center justify-center hover:shadow-lg transition flex-shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+          <h3 class="font-bold mb-3">Tips Bertanya</h3>
+          <ul class="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+            <li>• Tanyakan tentang materi spesifik</li>
+            <li>• Gunakan kata kunci seperti "Kebudayaan"</li>
+            <li>• Ketik "ringkasan" untuk ringkasan materi</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+  if (!state.user.aiChatted) { state.user.aiChatted = true; saveState(); completeMission('ai'); }
+  setTimeout(() => { const m = document.getElementById('chat-messages'); if (m) m.scrollTop = m.scrollHeight; }, 100);
+}
+function renderChatMessage(m) {
+  if (m.role === 'user') return `<div class="chat-bubble flex gap-2 justify-end"><div class="bg-gradient-to-br from-brand-500 to-accent-500 text-white rounded-2xl rounded-tr-sm p-3 max-w-[80%] shadow-sm"><p class="text-sm">${m.content}</p></div><div class="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold flex-shrink-0">${state.user.avatar}</div></div>`;
+  else return `<div class="chat-bubble flex gap-2"><div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white flex-shrink-0"><i class="fa-solid fa-robot text-sm"></i></div><div class="bg-white dark:bg-slate-800 rounded-2xl rounded-tl-sm p-3 max-w-[80%] shadow-sm"><p class="text-sm whitespace-pre-line">${m.content}</p></div></div>`;
+}
+function askQuickQuestion(q) { document.getElementById('chat-input').value = q; sendChatMessage(); }
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const message = input.value.trim(); if (!message) return;
+  chatHistory.push({ role: 'user', content: message }); input.value = '';
+  renderAIChatMessages(); showTypingIndicator();
+  setTimeout(() => { const response = getAIResponse(message); chatHistory.push({ role: 'ai', content: response }); hideTypingIndicator(); renderAIChatMessages(); }, 800 + Math.random() * 1200);
+}
+function renderAIChatMessages() { const c = document.getElementById('chat-messages'); if (!c) return; c.innerHTML = chatHistory.map(m => renderChatMessage(m)).join(''); c.scrollTop = c.scrollHeight; }
+function showTypingIndicator() { const c = document.getElementById('chat-messages'); if (!c) return; const t = document.createElement('div'); t.id = 'typing-indicator'; t.className = 'chat-bubble flex gap-2'; t.innerHTML = `<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white flex-shrink-0"><i class="fa-solid fa-robot text-sm"></i></div><div class="bg-white dark:bg-slate-800 rounded-2xl rounded-tl-sm p-4 shadow-sm"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`; c.appendChild(t); c.scrollTop = c.scrollHeight; }
+function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
+function getAIResponse(message) {
+  const lower = message.toLowerCase();
+  if (lower.includes('ringkas')) return `📋 RINGKASAN:\n1. Kebudayaan = hasil cipta rasa karsa manusia\n2. Wujud: Gagasan, Aktivitas, Artefak\n3. Perubahan: Evolusi (lambat) & Revolusi (cepat)\n4. Kearifan Lokal: kebijakan turun-temurun\n5. Menanggapi perubahan: Berpegang pada Pancasila`;
+  for (const item of aiKnowledge) { if (item.keywords.some(kw => lower.includes(kw))) return item.response; }
+  if (lower.match(/halo|hai|hi|hello/)) return `Halo ${state.user.name}! 👋 Ada yang bisa saya bantu?`;
+  if (lower.match('terima kasih|thanks')) return 'Sama-sama! 🙌';
+  return aiFallback;
+}
+function clearChat() { chatHistory = []; renderAI(); }
+
+// === TEACHER ACCESS & DASHBOARD ===
+function handleTeacherAccess() {
+  if (state.isTeacher) {
+    navigate('teacher');
+  } else {
+    showTeacherLoginModal();
+  }
+}
+
+function showTeacherLoginModal() {
+  const html = `
+    <div class="text-center mb-4">
+      <div class="w-16 h-16 rounded-full bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-chalkboard-user text-2xl text-brand-600"></i>
+      </div>
+      <h3 class="font-display text-xl font-bold">Login Guru</h3>
+      <p class="text-sm text-slate-500">Masukkan kata sandi untuk mengakses dashboard guru</p>
+    </div>
+    <div class="space-y-4">
+      <input type="password" id="teacher-pass" placeholder="Kata Sandi" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none text-center text-lg tracking-widest">
+      <button onclick="verifyTeacher()" class="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:shadow-lg transition">Masuk</button>
+    </div>
+  `;
+  openModal(html);
+}
+
+function verifyTeacher() {
+  const pass = document.getElementById('teacher-pass').value;
+  if (pass === 'guru123') {
+    state.isTeacher = true;
+    saveState();
+    updateTeacherAccessUI();
+    closeModal();
+    showToast('Login Guru Berhasil!', 'success', 'fa-check');
+    navigate('teacher');
+  } else {
+    showToast('Kata sandi salah!', 'error', 'fa-xmark');
+    const input = document.getElementById('teacher-pass');
+    input.classList.add('border-red-500');
+    input.value = '';
+  }
+}
+
+function logoutTeacher() {
+  state.isTeacher = false;
+  saveState();
+  updateTeacherAccessUI();
+  showToast('Anda telah keluar dari mode guru.', 'info', 'fa-info-circle');
+  navigate('home');
+}
+
+function updateTeacherAccessUI() {
+  const textEl = document.getElementById('teacher-access-text');
+  const mTextEl = document.getElementById('m-teacher-access-text');
+  if (state.isTeacher) {
+    if(textEl) textEl.textContent = 'Dashboard Guru';
+    if(mTextEl) mTextEl.textContent = 'Dashboard Guru';
+  } else {
+    if(textEl) textEl.textContent = 'Login Guru';
+    if(mTextEl) mTextEl.textContent = 'Login Guru';
+  }
+}
+
+function renderTeacher() {
+  document.getElementById('view-container').innerHTML = `
+    <div class="mb-6 flex justify-between items-center flex-wrap gap-3">
+      <div><h1 class="font-display text-3xl font-bold mb-1">Dashboard Guru 👨‍🏫</h1><p class="text-slate-500">Kelola pembelajaran dan pantau siswa</p></div>
+      <button onclick="logoutTeacher()" class="px-4 py-2 rounded-xl bg-red-100 text-red-600 font-semibold hover:bg-red-200 transition text-sm flex items-center gap-2"><i class="fa-solid fa-right-from-bracket"></i> Keluar Mode Guru</button>
+    </div>
+    <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar pb-1">
+      ${[{ id: 'overview', label: 'Ringkasan', icon: 'fa-chart-pie' }, { id: 'materi', label: 'Materi', icon: 'fa-book' }, { id: 'siswa', label: 'Siswa', icon: 'fa-users' }].map((t, i) => `<button onclick="switchTeacherTab('${t.id}')" data-ttab="${t.id}" class="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition ${i === 0 ? 'bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-lg' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'}"><i class="fa-solid ${t.icon} mr-1.5"></i> ${t.label}</button>`).join('')}
+    </div>
+    <div id="teacher-content">${renderTeacherOverview()}</div>
+  `;
+}
+function switchTeacherTab(tab) {
+  document.querySelectorAll('[data-ttab]').forEach(el => { el.classList.remove('bg-gradient-to-r', 'from-brand-500', 'to-brand-600', 'text-white', 'shadow-lg'); el.classList.add('bg-white', 'dark:bg-slate-900', 'border', 'border-slate-200', 'dark:border-slate-800'); });
+  const active = document.querySelector(`[data-ttab="${tab}"]`);
+  active.classList.add('bg-gradient-to-r', 'from-brand-500', 'to-brand-600', 'text-white', 'shadow-lg');
+  active.classList.remove('bg-white', 'dark:bg-slate-900', 'border', 'border-slate-200', 'dark:border-slate-800');
+  const content = document.getElementById('teacher-content');
+  if (tab === 'overview') content.innerHTML = renderTeacherOverview();
+  else if (tab === 'materi') content.innerHTML = renderTeacherMateri();
+  else if (tab === 'siswa') content.innerHTML = renderTeacherSiswa();
+}
+function renderTeacherOverview() {
+  return `
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800"><div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center mb-2"><i class="fa-solid fa-users text-brand-600"></i></div><div class="text-2xl font-bold">${state.students.length}</div><div class="text-xs text-slate-500">Total Siswa</div></div>
+      <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800"><div class="w-10 h-10 rounded-xl bg-accent-100 dark:bg-accent-900/40 flex items-center justify-center mb-2"><i class="fa-solid fa-book-open text-accent-600"></i></div><div class="text-2xl font-bold">${materiData.length}</div><div class="text-xs text-slate-500">Materi</div></div>
+      <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800"><div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mb-2"><i class="fa-solid fa-circle-question text-purple-600"></i></div><div class="text-2xl font-bold">${quizQuestions.length}</div><div class="text-xs text-slate-500">Soal</div></div>
+      <div class="card-hover bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800"><div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center mb-2"><i class="fa-solid fa-chart-line text-orange-600"></i></div><div class="text-2xl font-bold">78%</div><div class="text-xs text-slate-500">Kelulusan</div></div>
+    </div>
+    <div class="bg-gradient-to-br from-brand-500 to-accent-500 rounded-2xl p-6 text-white"><h3 class="font-bold mb-3">Aksi Cepat</h3><div class="grid grid-cols-2 sm:grid-cols-4 gap-2"><button onclick="switchTeacherTab('siswa')" class="bg-white/20 hover:bg-white/30 rounded-xl p-3 text-sm font-semibold transition flex items-center gap-2 justify-center"><i class="fa-solid fa-eye"></i> Pantau Siswa</button><button onclick="exportGrades('excel')" class="bg-white/20 hover:bg-white/30 rounded-xl p-3 text-sm font-semibold transition flex items-center gap-2 justify-center"><i class="fa-solid fa-file-excel"></i> Export Nilai</button></div></div>
+  `;
+}
+function renderTeacherMateri() {
+  return `<div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800"><h3 class="font-bold mb-4">Daftar Materi</h3><div class="space-y-2">${materiData.map((m, i) => `<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center text-white"><i class="fa-solid ${m.icon}"></i></div><div class="flex-1"><div class="font-medium">${m.title}</div><div class="text-xs text-slate-500">${getMateriLabel(i)} • ${m.duration}</div></div><span class="px-2 py-1 rounded-md bg-accent-100 dark:bg-accent-900/40 text-accent-700 text-xs font-semibold">Aktif</span></div></div>`).join('')}</div></div>`;
+}
+function renderTeacherSiswa() {
+  return `<div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 mb-4">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-users text-purple-500"></i> Daftar Siswa</h3>
+      <div class="flex gap-2">
+        <button onclick="openStudentForm()" class="px-3 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600"><i class="fa-solid fa-plus mr-1"></i> Tambah Siswa</button>
+        <button onclick="exportGrades('excel')" class="px-3 py-2 rounded-lg bg-accent-500 text-white text-sm font-semibold hover:bg-accent-600"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
+      </div>
+    </div>
+    <div class="space-y-2">
+      ${state.students.map(s => `
+        <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-brand-300 transition">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-sm font-bold">${s.avatar}</div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-sm ${s.isCurrentUser ? 'text-brand-600 dark:text-brand-400' : ''}">${s.name} ${s.isCurrentUser ? '(Saya)' : ''}</div>
+            <div class="text-xs text-slate-500">Level ${s.level} • ${s.city || 'Indonesia'} • ${s.kelas || '-'}</div>
+          </div>
+          <div class="text-right hidden sm:block">
+            <div class="font-bold text-sm">${s.xp}</div>
+            <div class="text-[10px] text-slate-500">XP</div>
+          </div>
+          <button onclick="openStudentDetail('${s.id}')" class="text-brand-500 hover:text-brand-700 p-2" title="Lihat Detail"><i class="fa-solid fa-eye"></i></button>
+          <button onclick="openStudentForm('${s.id}')" class="text-yellow-500 hover:text-yellow-700 p-2" title="Edit Siswa"><i class="fa-solid fa-pen"></i></button>
+          ${!s.isCurrentUser ? `<button onclick="deleteStudent('${s.id}')" class="text-red-500 hover:text-red-700 p-2" title="Hapus Siswa"><i class="fa-solid fa-trash"></i></button>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function openStudentForm(id = null) {
+  let student = { name: '', avatar: '', kelas: '7A', sekolah: 'SMP Nusantara', xp: 0, city: 'Jakarta', catatanGuru: '' };
+  let isEdit = false;
+  if (id) {
+    student = state.students.find(s => s.id === id);
+    if (!student) return;
+    isEdit = true;
+  }
+  const html = `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-xl font-bold">${isEdit ? 'Edit Data Siswa' : 'Tambah Siswa Baru'}</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Nama Lengkap</label>
+        <input type="text" id="form-name" value="${student.name}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none" placeholder="Masukkan nama siswa">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Inisial Avatar</label>
+          <input type="text" id="form-avatar" maxlength="2" value="${student.avatar}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none uppercase" placeholder="AB">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Kelas</label>
+          <input type="text" id="form-kelas" value="${student.kelas || '7A'}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Sekolah</label>
+          <input type="text" id="form-sekolah" value="${student.sekolah || 'SMP Nusantara'}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Kota</label>
+          <input type="text" id="form-city" value="${student.city || 'Jakarta'}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none">
+        </div>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-600 dark:text-slate-300">XP Awal</label>
+        <input type="number" id="form-xp" value="${student.xp || 0}" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none">
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Catatan Guru</label>
+        <textarea id="form-catatan" rows="2" class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm" placeholder="Catatan untuk siswa...">${student.catatanGuru || ''}</textarea>
+      </div>
+      <button onclick="saveStudent('${id || ''}')" class="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:shadow-lg transition">${isEdit ? 'Simpan Perubahan' : 'Tambah Siswa'}</button>
+    </div>
+  `;
+  openModal(html);
+}
+
+function saveStudent(id = '') {
+  const name = document.getElementById('form-name').value.trim();
+  if (!name) { showToast('Nama tidak boleh kosong!', 'error', 'fa-exclamation'); return; }
+  
+  const avatar = document.getElementById('form-avatar').value.toUpperCase() || name.substring(0, 2).toUpperCase();
+  const kelas = document.getElementById('form-kelas').value || '-';
+  const sekolah = document.getElementById('form-sekolah').value || '-';
+  const city = document.getElementById('form-city').value || '-';
+  const xp = parseInt(document.getElementById('form-xp').value) || 0;
+  const catatanGuru = document.getElementById('form-catatan').value.trim();
+  const level = calculateLevel(xp);
+  
+  if (id) {
+    const idx = state.students.findIndex(s => s.id === id);
+    if (idx !== -1) {
+      state.students[idx] = { ...state.students[idx], name, avatar, kelas, sekolah, city, xp, level, catatanGuru };
+      if (id === 'current_user') {
+        state.user.name = name; state.user.avatar = avatar; state.user.kelas = kelas;
+        state.user.sekolah = sekolah; state.user.xp = xp; state.user.level = level; state.user.catatanGuru = catatanGuru;
+        updateHeader();
+      }
+    }
+    showToast('Data siswa diperbarui!', 'success', 'fa-check');
+  } else {
+    const newStudent = {
+      id: 'stud_' + Date.now(), name, avatar, kelas, sekolah, city, xp, level,
+      badge: 'fa-star', badgeColor: 'text-brand-500', catatanGuru
+    };
+    state.students.push(newStudent);
+    showToast('Siswa baru ditambahkan!', 'success', 'fa-check');
+  }
+  saveState();
+  closeModal();
+  switchTeacherTab('siswa');
+}
+
+function deleteStudent(id) {
+  if (id === 'current_user') {
+    showToast('Akun sendiri tidak bisa dihapus!', 'warning', 'fa-triangle-exclamation');
+    return;
+  }
+  const student = state.students.find(s => s.id === id);
+  if (!student) return;
+  const html = `
+    <div class="text-center">
+      <div class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-triangle-exclamation text-2xl text-red-500"></i>
+      </div>
+      <h3 class="font-display text-xl font-bold mb-2">Hapus Siswa?</h3>
+      <p class="text-sm text-slate-500 mb-1">Apakah Anda yakin ingin menghapus:</p>
+      <p class="font-bold text-slate-800 dark:text-white mb-5">${student.name}?</p>
+      <div class="flex gap-2">
+        <button onclick="closeModal()" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 font-semibold transition">Batal</button>
+        <button onclick="confirmDeleteStudent('${id}')" class="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition">Hapus</button>
+      </div>
+    </div>
+  `;
+  openModal(html);
+}
+
+function confirmDeleteStudent(id) {
+  state.students = state.students.filter(s => s.id !== id);
+  saveState();
+  closeModal();
+  showToast('Siswa berhasil dihapus!', 'success', 'fa-trash');
+  switchTeacherTab('siswa');
+}
+
+function openStudentDetail(id) {
+  const s = state.students.find(st => st.id === id);
+  if (!s) return;
+  const materiDone = s.isCurrentUser ? state.user.completedMateri.length : Math.floor(Math.random() * (materiData.length + 1));
+  const quizDone = s.isCurrentUser ? state.user.quizScores.length : Math.floor(Math.random() * 4);
+  const progress = Math.min(100, Math.floor((s.xp / 1500) * 100));
+  const html = `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-xl font-bold">Profil & Pantauan Siswa</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="flex items-center gap-4 mb-6">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">${s.avatar}</div>
+      <div>
+        <div class="font-display text-xl font-bold">${s.name}</div>
+        <div class="text-sm text-slate-500">Level ${s.level} • ${s.kelas || '7A'} • ${s.sekolah || 'SMP Nusantara'}</div>
+        <div class="text-xs text-accent-600 font-semibold mt-1">${s.xp} XP Total</div>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 mb-6 text-center">
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+        <div class="text-xl font-bold text-brand-600">${materiDone}/${materiData.length}</div>
+        <div class="text-[10px] text-slate-500">Materi Selesai</div>
+      </div>
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+        <div class="text-xl font-bold text-accent-600">${quizDone}</div>
+        <div class="text-[10px] text-slate-500">Kuis Dikerjakan</div>
+      </div>
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+        <div class="text-xl font-bold text-purple-600">${progress}%</div>
+        <div class="text-[10px] text-slate-500">Progress</div>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Catatan Guru (Pantauan)</label>
+      <textarea id="teacher-notes" rows="3" placeholder="Tulis catatan atau evaluasi untuk siswa ini..." class="w-full mt-1 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-brand-500 outline-none resize-none text-sm">${s.catatanGuru || ''}</textarea>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="saveTeacherNotes('${s.id}')" class="flex-1 px-4 py-2.5 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 transition">Simpan Catatan</button>
+      <button onclick="closeModal(); openStudentForm('${s.id}')" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold hover:border-brand-300 transition"><i class="fa-solid fa-pen"></i> Edit Siswa</button>
+    </div>
+  `;
+  openModal(html);
+}
+
+function saveTeacherNotes(id) {
+  const notes = document.getElementById('teacher-notes').value;
+  const idx = state.students.findIndex(s => s.id === id);
+  if (idx !== -1) {
+    state.students[idx].catatanGuru = notes;
+    if (state.students[idx].isCurrentUser) {
+      state.user.catatanGuru = notes;
+    }
+  }
+  saveState();
+  showToast('Catatan guru berhasil disimpan!', 'success', 'fa-check');
+  closeModal();
+}
+
+function exportGrades(type) { showToast(`Mengekspor nilai ke ${type.toUpperCase()}...`, 'info', 'fa-download'); setTimeout(() => showToast(`File berhasil diunduh!`, 'success', 'fa-check'), 1500); }
+
+// === NETWORK STATUS (Online/Offline Detection) ===
+function updateNetworkStatus() {
+  const icon = document.getElementById('network-icon');
+  if (!icon) return;
+  if (navigator.onLine) {
+    icon.className = 'fa-solid fa-wifi text-lg text-accent-500';
+  } else {
+    icon.className = 'fa-solid fa-wifi-slash text-lg text-red-500';
+  }
+}
+
+window.addEventListener('online', () => {
+  showToast('Koneksi internet tersambung! Kamu bisa nonton video materi sekarang.', 'success', 'fa-wifi');
+  updateNetworkStatus();
+  if (state.currentView === 'video' || state.currentView === 'home') navigate(state.currentView);
+});
+
+window.addEventListener('offline', () => {
+  showToast('Kamu sedang offline. Video materi tidak bisa diakses, tapi materi teks tetap bisa dibaca.', 'warning', 'fa-wifi');
+  updateNetworkStatus();
+  if (state.currentView === 'video' || state.currentView === 'home') navigate(state.currentView);
+});
+
+function checkNetworkStatus() {
+  if (navigator.onLine) {
+    showToast('Kamu sedang online. Semua fitur tersedia!', 'success', 'fa-wifi');
+  } else {
+    showToast('Kamu sedang offline. Video materi tidak bisa diakses.', 'warning', 'fa-wifi-slash');
+  }
+}
+
+// === INIT ===
+function init() {
+  applyTheme();
+  updateStreak();
+  updateHeader();
+  updateMissionSidebar();
+  updateNetworkStatus();
+  updateTeacherAccessUI();
+  navigate('home');
+}
+init();
+</script>
+</body>
+</html>
