@@ -105,135 +105,185 @@ html { scroll-behavior: smooth; }
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 min-h-screen">
 
-<header class="sticky top-0 z-40 glass border-b border-slate-200/50 dark:border-slate-700/50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-    <div class="flex items-center gap-3">
-      <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-bars text-lg"></i></button>
-      <div class="flex items-center gap-2.5 cursor-pointer" onclick="navigate('home')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30"><i class="fa-solid fa-graduation-cap text-lg"></i></div>
-        <div><div class="font-display font-bold text-lg leading-none">Arkasila</div><div class="text-[10px] text-slate-500 dark:text-slate-400 leading-none mt-0.5">Media Pembelajaran SMP</div></div>
+<!-- ================= HALAMAN LOGIN ================= -->
+<div id="login-wrapper" class="min-h-screen flex items-center justify-center relative overflow-hidden animated-hero-bg transition-opacity duration-300">
+  <div class="blob bg-brand-400 w-72 h-72 top-0 right-0"></div>
+  <div class="blob bg-accent-400 w-64 h-64 bottom-0 left-1/3" style="animation-delay:-4s"></div>
+  
+  <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl w-full max-w-md rounded-3xl shadow-2xl p-8 relative z-10 border border-slate-200/50 dark:border-slate-700/50 mx-4">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white text-3xl mx-auto mb-4 shadow-lg shadow-brand-500/30">
+        <i class="fa-solid fa-graduation-cap"></i>
       </div>
+      <h1 class="font-display text-3xl font-bold mb-2 text-slate-900 dark:text-white">Arkasila</h1>
+      <p class="text-slate-500 dark:text-slate-400">Silakan login untuk memulai aplikasi</p>
     </div>
-    <div class="hidden md:flex items-center gap-3 flex-1 max-w-xs">
-      <div class="flex items-center gap-1.5 text-sm"><span class="font-bold text-brand-600 dark:text-brand-400">Lvl <span id="header-level">1</span></span></div>
-      <div class="flex-1 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden"><div id="header-xp-bar" class="h-full bg-gradient-to-r from-brand-500 to-accent-500 progress-fill" style="width:0%"></div></div>
-      <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap"><span id="header-xp">0</span> XP</span>
-    </div>
-    <div class="flex items-center gap-1.5 sm:gap-2">
-      <div class="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400"><span class="streak-glow">🔥</span><span class="text-sm font-bold" id="header-streak">0</span></div>
-      <button onclick="checkNetworkStatus()" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Network Status">
-        <i id="network-icon" class="fa-solid fa-wifi text-lg text-accent-500"></i>
-      </button>
-      <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Toggle theme"><i id="theme-icon" class="fa-solid fa-moon text-lg"></i></button>
-      <button onclick="showNotifications()" class="relative p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Notifications"><i class="fa-solid fa-bell text-lg"></i></button>
-      <button onclick="navigate('dashboard')" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition">
-        <div id="header-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-sm font-bold">S</div>
-        <span class="hidden sm:block text-sm font-medium" id="header-name">Siswa</span>
-      </button>
-    </div>
-  </div>
-</header>
-
-<aside id="sidebar" class="hidden lg:flex fixed left-0 top-16 bottom-0 w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md z-30">
-  <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Menu Utama</div>
-    <button onclick="navigate('home')" data-nav="home" class="sidebar-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-house w-5 text-center text-slate-500"></i><span>Beranda</span></button>
-    <button onclick="navigate('dashboard')" data-nav="dashboard" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-chart-line w-5 text-center text-slate-500"></i><span>Dashboard</span></button>
-    <button onclick="navigate('materi')" data-nav="materi" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-book-open w-5 text-center text-slate-500"></i><span>Materi</span></button>
-    <button onclick="navigate('video')" data-nav="video" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-video w-5 text-center text-slate-500"></i><span>Video Materi</span></button>
-    <button onclick="navigate('kuis')" data-nav="kuis" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-circle-question w-5 text-center text-slate-500"></i><span>Kuis</span></button>
-    <button onclick="navigate('game')" data-nav="game" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-gamepad w-5 text-center text-slate-500"></i><span>Game Edukasi</span></button>
     
-    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Informasi</div>
-    <button onclick="showUserGuide()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-      <i class="fa-solid fa-circle-info w-5 text-center text-slate-500"></i><span>Petunjuk Penggunaan</span>
-    </button>
-    
-    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Pencapaian</div>
-    <button onclick="navigate('leaderboard')" data-nav="leaderboard" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-trophy w-5 text-center text-slate-500"></i><span>Papan Skor</span></button>
-    <button onclick="navigate('sertifikat')" data-nav="sertifikat" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-award w-5 text-center text-slate-500"></i><span>Sertifikat</span></button>
-    <button onclick="navigate('ai')" data-nav="ai" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-robot w-5 text-center text-slate-500"></i><span>AI Tutor</span><span class="ml-auto text-[9px] bg-accent-500 text-white px-1.5 py-0.5 rounded-full font-bold">NEW</span></button>
-    
-    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Guru</div>
-    <button onclick="handleTeacherAccess()" id="teacher-access-btn" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-      <i class="fa-solid fa-chalkboard-user w-5 text-center text-slate-500"></i>
-      <span id="teacher-access-text">Login Guru</span>
-    </button>
-  </nav>
-  <div class="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-    <div class="bg-gradient-to-br from-brand-500 to-accent-500 rounded-xl p-3 text-white">
-      <div class="flex items-center justify-between mb-2"><span class="text-xs font-bold opacity-90"><i class="fa-solid fa-bullseye mr-1"></i>Misi Hari Ini</span><span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full" id="sidebar-mission-count">0/4</span></div>
-      <div class="text-xs opacity-90 mb-2" id="sidebar-mission-text">Selesaikan 1 materi</div>
-      <div class="h-1.5 bg-white/20 rounded-full overflow-hidden"><div id="sidebar-mission-bar" class="h-full bg-white progress-fill" style="width:0%"></div></div>
-    </div>
-    <div class="text-center">
-      <p class="text-[10px] text-slate-500 dark:text-slate-400">Dibuat oleh:</p>
-      <p class="text-xs font-bold text-brand-600 dark:text-brand-400 tracking-wide">OKTAPIA JASMAN</p>
-    </div>
-  </div>
-</aside>
-
-<div id="mobile-sidebar" class="fixed inset-0 z-50 hidden lg:hidden">
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeMobileSidebar()"></div>
-  <div class="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-slate-900 shadow-2xl overflow-y-auto flex flex-col">
-    <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-      <div class="flex items-center gap-2"><div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white"><i class="fa-solid fa-graduation-cap"></i></div><span class="font-display font-bold">Arkasila</span></div>
-      <button onclick="closeMobileSidebar()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <nav class="p-3 space-y-1 flex-grow">
-      <button onclick="navigate('home');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-house w-5 text-center text-brand-500"></i>Beranda</button>
-      <button onclick="navigate('dashboard');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-chart-line w-5 text-center text-brand-500"></i>Dashboard</button>
-      <button onclick="navigate('materi');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-book-open w-5 text-center text-brand-500"></i>Materi</button>
-      <button onclick="navigate('video');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-video w-5 text-center text-brand-500"></i>Video Materi</button>
-      <button onclick="navigate('kuis');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-circle-question w-5 text-center text-brand-500"></i>Kuis</button>
-      <button onclick="navigate('game');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-gamepad w-5 text-center text-brand-500"></i>Game Edukasi</button>
+    <div class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Username</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="fa-solid fa-user text-slate-400"></i>
+          </div>
+          <input type="text" id="login-username" class="w-full pl-11 pr-4 py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-900 focus:border-brand-500 outline-none transition" placeholder="Masukkan username">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="fa-solid fa-lock text-slate-400"></i>
+          </div>
+          <input type="password" id="login-password" class="w-full pl-11 pr-4 py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-900 focus:border-brand-500 outline-none transition" placeholder="Masukkan password" onkeyup="if(event.key === 'Enter') processLogin()">
+        </div>
+      </div>
       
-      <hr class="my-2 border-slate-200 dark:border-slate-700">
+      <div id="login-error" class="hidden bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 text-sm font-medium text-center p-3 rounded-xl flex items-center justify-center gap-2">
+        <i class="fa-solid fa-circle-exclamation"></i> Username atau Password salah!
+      </div>
       
-      <button onclick="showUserGuide();closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-        <i class="fa-solid fa-circle-info w-5 text-center text-brand-500"></i>Petunjuk Penggunaan
+      <button onclick="processLogin()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-white font-bold hover:shadow-lg hover:shadow-brand-500/30 hover:-translate-y-0.5 transition flex justify-center items-center gap-2 mt-2">
+        Masuk Aplikasi <i class="fa-solid fa-arrow-right"></i>
       </button>
-      
-      <button onclick="navigate('leaderboard');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-trophy w-5 text-center text-brand-500"></i>Papan Skor</button>
-      <button onclick="navigate('sertifikat');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-award w-5 text-center text-brand-500"></i>Sertifikat</button>
-      <button onclick="navigate('ai');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-robot w-5 text-center text-brand-500"></i>AI Tutor <span class="ml-auto text-[9px] bg-accent-500 text-white px-1.5 py-0.5 rounded-full font-bold">NEW</span></button>
-      
-      <hr class="my-2 border-slate-200 dark:border-slate-700">
-      
-      <button onclick="handleTeacherAccess();closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-        <i class="fa-solid fa-chalkboard-user w-5 text-center text-brand-500"></i>
-        <span id="m-teacher-access-text">Login Guru</span>
-      </button>
-    </nav>
-    <div class="p-4 mt-auto border-t border-slate-200 dark:border-slate-700 text-center">
-      <p class="text-[10px] text-slate-500 dark:text-slate-400">Dibuat oleh:</p>
-      <p class="text-xs font-bold text-brand-600 dark:text-brand-400 tracking-wide">OKTAPIA JASMAN</p>
     </div>
   </div>
 </div>
+<!-- ================= END HALAMAN LOGIN ================= -->
 
-<main id="main-content" class="lg:ml-64 pb-24 lg:pb-8 min-h-[calc(100vh-4rem)]">
-  <div id="view-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-6"></div>
-</main>
+<!-- ================= APLIKASI UTAMA ================= -->
+<div id="app-wrapper" class="hidden">
+  <header class="sticky top-0 z-40 glass border-b border-slate-200/50 dark:border-slate-700/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-bars text-lg"></i></button>
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="navigate('home')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30"><i class="fa-solid fa-graduation-cap text-lg"></i></div>
+          <div><div class="font-display font-bold text-lg leading-none">Arkasila</div><div class="text-[10px] text-slate-500 dark:text-slate-400 leading-none mt-0.5">Media Pembelajaran SMP</div></div>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-3 flex-1 max-w-xs">
+        <div class="flex items-center gap-1.5 text-sm"><span class="font-bold text-brand-600 dark:text-brand-400">Lvl <span id="header-level">1</span></span></div>
+        <div class="flex-1 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden"><div id="header-xp-bar" class="h-full bg-gradient-to-r from-brand-500 to-accent-500 progress-fill" style="width:0%"></div></div>
+        <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap"><span id="header-xp">0</span> XP</span>
+      </div>
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <div class="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400"><span class="streak-glow">🔥</span><span class="text-sm font-bold" id="header-streak">0</span></div>
+        <button onclick="checkNetworkStatus()" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Network Status">
+          <i id="network-icon" class="fa-solid fa-wifi text-lg text-accent-500"></i>
+        </button>
+        <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Toggle theme"><i id="theme-icon" class="fa-solid fa-moon text-lg"></i></button>
+        <button onclick="showNotifications()" class="relative p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Notifications"><i class="fa-solid fa-bell text-lg"></i></button>
+        <button onclick="navigate('dashboard')" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+          <div id="header-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-sm font-bold">S</div>
+          <span class="hidden sm:block text-sm font-medium" id="header-name">Siswa</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-200/50 dark:border-slate-700/50">
-  <div class="grid grid-cols-5 h-16">
-    <button onclick="navigate('home')" class="bottom-nav-item active flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-house text-sm"></i></div><span class="text-[10px] font-medium">Beranda</span></button>
-    <button onclick="navigate('materi')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-book-open text-sm"></i></div><span class="text-[10px] font-medium">Materi</span></button>
-    <button onclick="navigate('kuis')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center relative"><i class="fa-solid fa-circle-question text-sm"></i></div><span class="text-[10px] font-medium">Kuis</span></button>
-    <button onclick="navigate('game')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-gamepad text-sm"></i></div><span class="text-[10px] font-medium">Game</span></button>
-    <button onclick="navigate('dashboard')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-user text-sm"></i></div><span class="text-[10px] font-medium">Profil</span></button>
+  <aside id="sidebar" class="hidden lg:flex fixed left-0 top-16 bottom-0 w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md z-30">
+    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+      <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Menu Utama</div>
+      <button onclick="navigate('home')" data-nav="home" class="sidebar-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-house w-5 text-center text-slate-500"></i><span>Beranda</span></button>
+      <button onclick="navigate('dashboard')" data-nav="dashboard" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-chart-line w-5 text-center text-slate-500"></i><span>Dashboard</span></button>
+      <button onclick="navigate('materi')" data-nav="materi" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-book-open w-5 text-center text-slate-500"></i><span>Materi</span></button>
+      <button onclick="navigate('video')" data-nav="video" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-video w-5 text-center text-slate-500"></i><span>Video Materi</span></button>
+      <button onclick="navigate('kuis')" data-nav="kuis" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-circle-question w-5 text-center text-slate-500"></i><span>Kuis</span></button>
+      <button onclick="navigate('game')" data-nav="game" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-gamepad w-5 text-center text-slate-500"></i><span>Game Edukasi</span></button>
+      
+      <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Informasi</div>
+      <button onclick="showUserGuide()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+        <i class="fa-solid fa-circle-info w-5 text-center text-slate-500"></i><span>Petunjuk Penggunaan</span>
+      </button>
+      
+      <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Pencapaian</div>
+      <button onclick="navigate('leaderboard')" data-nav="leaderboard" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-trophy w-5 text-center text-slate-500"></i><span>Papan Skor</span></button>
+      <button onclick="navigate('sertifikat')" data-nav="sertifikat" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-award w-5 text-center text-slate-500"></i><span>Sertifikat</span></button>
+      <button onclick="navigate('ai')" data-nav="ai" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-robot w-5 text-center text-slate-500"></i><span>AI Tutor</span><span class="ml-auto text-[9px] bg-accent-500 text-white px-1.5 py-0.5 rounded-full font-bold">NEW</span></button>
+      
+      <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-4">Guru</div>
+      <button onclick="handleTeacherAccess()" id="teacher-access-btn" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+        <i class="fa-solid fa-chalkboard-user w-5 text-center text-slate-500"></i>
+        <span id="teacher-access-text">Login Guru</span>
+      </button>
+    </nav>
+    <div class="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+      <div class="bg-gradient-to-br from-brand-500 to-accent-500 rounded-xl p-3 text-white">
+        <div class="flex items-center justify-between mb-2"><span class="text-xs font-bold opacity-90"><i class="fa-solid fa-bullseye mr-1"></i>Misi Hari Ini</span><span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full" id="sidebar-mission-count">0/4</span></div>
+        <div class="text-xs opacity-90 mb-2" id="sidebar-mission-text">Selesaikan 1 materi</div>
+        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden"><div id="sidebar-mission-bar" class="h-full bg-white progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="text-center">
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">Dibuat oleh:</p>
+        <p class="text-xs font-bold text-brand-600 dark:text-brand-400 tracking-wide">OKTAPIA JASMAN</p>
+      </div>
+    </div>
+  </aside>
+
+  <div id="mobile-sidebar" class="fixed inset-0 z-50 hidden lg:hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeMobileSidebar()"></div>
+    <div class="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-slate-900 shadow-2xl overflow-y-auto flex flex-col">
+      <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2"><div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white"><i class="fa-solid fa-graduation-cap"></i></div><span class="font-display font-bold">Arkasila</span></div>
+        <button onclick="closeMobileSidebar()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <nav class="p-3 space-y-1 flex-grow">
+        <button onclick="navigate('home');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-house w-5 text-center text-brand-500"></i>Beranda</button>
+        <button onclick="navigate('dashboard');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-chart-line w-5 text-center text-brand-500"></i>Dashboard</button>
+        <button onclick="navigate('materi');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-book-open w-5 text-center text-brand-500"></i>Materi</button>
+        <button onclick="navigate('video');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-video w-5 text-center text-brand-500"></i>Video Materi</button>
+        <button onclick="navigate('kuis');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-circle-question w-5 text-center text-brand-500"></i>Kuis</button>
+        <button onclick="navigate('game');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-gamepad w-5 text-center text-brand-500"></i>Game Edukasi</button>
+        
+        <hr class="my-2 border-slate-200 dark:border-slate-700">
+        
+        <button onclick="showUserGuide();closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <i class="fa-solid fa-circle-info w-5 text-center text-brand-500"></i>Petunjuk Penggunaan
+        </button>
+        
+        <button onclick="navigate('leaderboard');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-trophy w-5 text-center text-brand-500"></i>Papan Skor</button>
+        <button onclick="navigate('sertifikat');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-award w-5 text-center text-brand-500"></i>Sertifikat</button>
+        <button onclick="navigate('ai');closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-robot w-5 text-center text-brand-500"></i>AI Tutor <span class="ml-auto text-[9px] bg-accent-500 text-white px-1.5 py-0.5 rounded-full font-bold">NEW</span></button>
+        
+        <hr class="my-2 border-slate-200 dark:border-slate-700">
+        
+        <button onclick="handleTeacherAccess();closeMobileSidebar()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <i class="fa-solid fa-chalkboard-user w-5 text-center text-brand-500"></i>
+          <span id="m-teacher-access-text">Login Guru</span>
+        </button>
+      </nav>
+      <div class="p-4 mt-auto border-t border-slate-200 dark:border-slate-700 text-center">
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">Dibuat oleh:</p>
+        <p class="text-xs font-bold text-brand-600 dark:text-brand-400 tracking-wide">OKTAPIA JASMAN</p>
+      </div>
+    </div>
   </div>
-</nav>
 
-<button id="ai-fab" onclick="navigate('ai')" class="fixed bottom-20 lg:bottom-6 right-4 z-30 w-14 h-14 rounded-full bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-xl shadow-brand-500/40 flex items-center justify-center hover:scale-110 transition relative">
-  <i class="fa-solid fa-robot text-xl"></i>
-</button>
+  <main id="main-content" class="lg:ml-64 pb-24 lg:pb-8 min-h-[calc(100vh-4rem)]">
+    <div id="view-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-6"></div>
+  </main>
 
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-200/50 dark:border-slate-700/50">
+    <div class="grid grid-cols-5 h-16">
+      <button onclick="navigate('home')" class="bottom-nav-item active flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-house text-sm"></i></div><span class="text-[10px] font-medium">Beranda</span></button>
+      <button onclick="navigate('materi')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-book-open text-sm"></i></div><span class="text-[10px] font-medium">Materi</span></button>
+      <button onclick="navigate('kuis')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center relative"><i class="fa-solid fa-circle-question text-sm"></i></div><span class="text-[10px] font-medium">Kuis</span></button>
+      <button onclick="navigate('game')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-gamepad text-sm"></i></div><span class="text-[10px] font-medium">Game</span></button>
+      <button onclick="navigate('dashboard')" class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400"><div class="nav-icon-wrap w-9 h-7 rounded-lg flex items-center justify-center"><i class="fa-solid fa-user text-sm"></i></div><span class="text-[10px] font-medium">Profil</span></button>
+    </div>
+  </nav>
+
+  <button id="ai-fab" onclick="navigate('ai')" class="fixed bottom-20 lg:bottom-6 right-4 z-30 w-14 h-14 rounded-full bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-xl shadow-brand-500/40 flex items-center justify-center hover:scale-110 transition relative">
+    <i class="fa-solid fa-robot text-xl"></i>
+  </button>
+</div>
+<!-- ================= END APLIKASI UTAMA ================= -->
+
+<!-- Toast dan Modal Container (di luar pembungkus app agar bekerja secara global jika dipanggil) -->
 <div id="toast-container" class="fixed top-20 right-4 z-[100] space-y-2 max-w-sm w-[calc(100%-2rem)] sm:w-auto"></div>
 
-<!-- Modal Container -->
-<div id="modal-container" class="fixed inset-0 z-[90] hidden flex items-center justify-center p-4">
+<div id="modal-container" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal()"></div>
   <div id="modal-content" class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto modal-enter"></div>
 </div>
@@ -1635,7 +1685,7 @@ function renderTeacherOverview() {
   `;
 }
 function renderTeacherMateri() {
-  return `<div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800"><h3 class="font-bold mb-4">Daftar Materi</h3><div class="space-y-2">${materiData.map((m, i) => `<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center text-white"><i class="fa-solid ${m.icon}"></i></div><div class="flex-1"><div class="font-medium">${m.title}</div><div class="text-xs text-slate-500">${getMateriLabel(i)} • ${m.duration}</div></div><span class="px-2 py-1 rounded-md bg-accent-100 dark:bg-accent-900/40 text-accent-700 text-xs font-semibold">Aktif</span></div></div>`).join('')}</div></div>`;
+  return `<div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800"><h3 class="font-bold mb-4">Daftar Materi</h3><div class="space-y-2">${materiData.map((m, i) => `<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center text-white"><i class="fa-solid ${m.icon}"></i></div><div class="flex-1"><div class="font-medium">${m.title}</div><div class="text-xs text-slate-500">${getMateriLabel(i)} •${m.duration}</div></div><span class="px-2 py-1 rounded-md bg-accent-100 dark:bg-accent-900/40 text-accent-700 text-xs font-semibold">Aktif</span></div></div>`).join('')}</div></div>`;
 }
 function renderTeacherSiswa() {
   return `<div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 mb-4">
@@ -1651,8 +1701,8 @@ function renderTeacherSiswa() {
         <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-brand-300 transition">
           <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-sm font-bold">${s.avatar}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-semibold text-sm ${s.isCurrentUser ? 'text-brand-600 dark:text-brand-400' : ''}">${s.name} ${s.isCurrentUser ? '(Saya)' : ''}</div>
-            <div class="text-xs text-slate-500">Level ${s.level} • ${s.city || 'Indonesia'} • ${s.kelas || '-'}</div>
+            <div class="font-semibold text-sm ${s.isCurrentUser ? 'text-brand-600 dark:text-brand-400' : ''}">${s.name}${s.isCurrentUser ? '(Saya)' : ''}</div>
+            <div class="text-xs text-slate-500">Level ${s.level} • ${s.city \vert{}\vert{} 'Indonesia'} •${s.kelas || '-'}</div>
           </div>
           <div class="text-right hidden sm:block">
             <div class="font-bold text-sm">${s.xp}</div>
@@ -1879,7 +1929,29 @@ function checkNetworkStatus() {
   }
 }
 
-// === INIT ===
+// === LOGIN & INIT ===
+function processLogin() {
+  const user = document.getElementById('login-username').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const errorEl = document.getElementById('login-error');
+  
+  if (user === 'guru' && pass === 'guru123') {
+    errorEl.classList.add('hidden');
+    sessionStorage.setItem('arkasila_logged_in', 'true');
+    
+    // Animasi transisi yang halus
+    const loginWrapper = document.getElementById('login-wrapper');
+    loginWrapper.style.opacity = '0';
+    setTimeout(() => {
+      loginWrapper.classList.add('hidden');
+      document.getElementById('app-wrapper').classList.remove('hidden');
+      init();
+    }, 300);
+  } else {
+    errorEl.classList.remove('hidden');
+  }
+}
+
 function init() {
   applyTheme();
   updateStreak();
@@ -1889,7 +1961,17 @@ function init() {
   updateTeacherAccessUI();
   navigate('home');
 }
-init();
+
+// Pengecekan sesi login pada saat halaman dimuat
+if (sessionStorage.getItem('arkasila_logged_in') === 'true') {
+  document.getElementById('login-wrapper').classList.add('hidden');
+  document.getElementById('app-wrapper').classList.remove('hidden');
+  init();
+} else {
+  document.getElementById('login-wrapper').classList.remove('hidden');
+  document.getElementById('app-wrapper').classList.add('hidden');
+  applyTheme(); // memastikan tema gelap/terang diaplikasikan di halaman login
+}
 </script>
 </body>
 </html>
